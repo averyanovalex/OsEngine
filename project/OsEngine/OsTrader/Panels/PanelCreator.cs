@@ -18,6 +18,8 @@ using OsEngine.OsTrader.Panels.Tab;
 using OsEngine.Robots.Trend;
 using MessageBox = System.Windows.MessageBox;
 
+using OsEngine.Robots.aDemo; //учебные роботы
+
 
 namespace OsEngine.OsTrader.Panels
 {
@@ -31,6 +33,9 @@ namespace OsEngine.OsTrader.Panels
         public static List<string> GetNamesStrategy()
         {
             List<string> result = new List<string>();
+
+            //аDemo: Мои учебные роботы
+            result.Add("DemoHammer");
 
             result.Add("Engine");
             result.Add("ClusterEngine");
@@ -66,6 +71,13 @@ namespace OsEngine.OsTrader.Panels
         {
 
             BotPanel bot = null;
+
+            //аDemo: Мои учебные роботы
+            if (nameClass == "DemoHammer")
+            {
+                bot = new DemoHammer(name, startProgram);
+            }
+
             // примеры и бесплатные боты
 
             if (nameClass == "MomentumMACD")
