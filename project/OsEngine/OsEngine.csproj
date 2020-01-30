@@ -643,6 +643,7 @@
     </Compile>
     <Compile Include="Robots\aDemo\DemoHammer.cs" />
     <Compile Include="Robots\aDemo\DemoRobot1.cs" />
+    <Compile Include="Robots\aDemo\DemoRobot2.cs" />
     <Compile Include="Robots\aDemo\ThreeSoldiers.cs" />
     <Compile Include="Robots\BotFactory.cs" />
     <Compile Include="Robots\CounterTrend\ClusterCountertrend.cs" />
