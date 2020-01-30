@@ -37,6 +37,7 @@ namespace OsEngine.OsTrader.Panels
             //аDemo: Мои учебные роботы
             result.Add("DemoHammer");
             result.Add("DemoThreeSoldiers");
+            result.Add("DemoRobot1");
 
             result.Add("Engine");
             result.Add("ClusterEngine");
@@ -81,6 +82,10 @@ namespace OsEngine.OsTrader.Panels
             if (nameClass == "DemoThreeSoldiers")
             {
                 bot = new DemoThreeSoldiers(name, startProgram);
+            }
+            if (nameClass == "DemoRobot1")
+            {
+                bot = new DemoRobot1(name, startProgram);
             }
 
 
