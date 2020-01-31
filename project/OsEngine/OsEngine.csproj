@@ -642,6 +642,7 @@
       <DependentUpon>BollingerOutburstUi.xaml</DependentUpon>
     </Compile>
     <Compile Include="Robots\aDemo\DemoHammer.cs" />
+    <Compile Include="Robots\aDemo\DemoHammerArbitrage.cs" />
     <Compile Include="Robots\aDemo\DemoRobot1.cs" />
     <Compile Include="Robots\aDemo\DemoRobot2.cs" />
     <Compile Include="Robots\aDemo\ThreeSoldiers.cs" />
