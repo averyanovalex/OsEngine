@@ -641,6 +641,10 @@
     <Compile Include="OsTrader\Panels\PanelsGui\BollingerOutburstUi.xaml.cs">
       <DependentUpon>BollingerOutburstUi.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Robots\aDemo\DemoBullishEngulfing.cs" />
+    <Compile Include="Robots\aDemo\DemoBullishEngulfingUi.xaml.cs">
+      <DependentUpon>DemoBullishEngulfingUi.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Robots\aDemo\DemoHammer.cs" />
     <Compile Include="Robots\aDemo\DemoHammerArbitrage.cs" />
     <Compile Include="Robots\aDemo\DemoRobot1.cs" />
@@ -1149,6 +1153,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="OsTrader\Panels\PanelsGui\BollingerOutburstUi.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Robots\aDemo\DemoBullishEngulfingUi.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
