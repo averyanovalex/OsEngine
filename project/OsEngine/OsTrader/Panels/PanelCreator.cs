@@ -41,7 +41,8 @@ namespace OsEngine.OsTrader.Panels
             result.Add("DemoRobot2");
             result.Add("DemoHammerArbitrage");
             result.Add("DemoBullishEngulfing");
-            
+            result.Add("DemoMovingAverage");
+
 
             result.Add("Engine");
             result.Add("ClusterEngine");
@@ -102,6 +103,10 @@ namespace OsEngine.OsTrader.Panels
             if (nameClass == "DemoBullishEngulfing")
             {
                 bot = new DemoBullishEngulfing(name, startProgram);
+            }
+            if (nameClass == "DemoMovingAverage")
+            {
+                bot = new DemoMovingAverage(name, startProgram);
             }
 
 
