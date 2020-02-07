@@ -19,6 +19,7 @@ using OsEngine.Robots.Trend;
 using MessageBox = System.Windows.MessageBox;
 
 using OsEngine.Robots.aDemo; //учебные роботы
+using OsEngine.Robots.aDev; //роботы в разработке
 
 
 namespace OsEngine.OsTrader.Panels
@@ -33,6 +34,9 @@ namespace OsEngine.OsTrader.Panels
         public static List<string> GetNamesStrategy()
         {
             List<string> result = new List<string>();
+
+            //aDev, aProd: Мои боевые роботы
+            result.Add("DevPingBot");
 
             //аDemo: Мои учебные роботы
             result.Add("DemoHammer");
@@ -80,6 +84,12 @@ namespace OsEngine.OsTrader.Panels
 
             BotPanel bot = null;
 
+            //aDev, aProd: Мои боевые роботы
+            if (nameClass == "DevPingBot")
+            {
+                bot = new PingBot(name, startProgram);
+            }
+
             //аDemo: Мои учебные роботы
             if (nameClass == "DemoHammer")
             {
@@ -113,7 +123,6 @@ namespace OsEngine.OsTrader.Panels
             {
                 bot = new DemoTrendEnvelopes(name, startProgram);
             }
-
 
             // примеры и бесплатные боты
 

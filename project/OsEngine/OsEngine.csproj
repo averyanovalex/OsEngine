@@ -652,6 +652,11 @@
     <Compile Include="Robots\aDemo\DemoRobot2.cs" />
     <Compile Include="Robots\aDemo\DemoTrendEnvelopes.cs" />
     <Compile Include="Robots\aDemo\ThreeSoldiers.cs" />
+    <Compile Include="Robots\aDev\PingBot.cs" />
+    <Compile Include="Robots\aDev\PingBotUi.xaml.cs">
+      <DependentUpon>PingBotUi.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Robots\aLibs\CommonFuncs.cs" />
     <Compile Include="Robots\BotFactory.cs" />
     <Compile Include="Robots\CounterTrend\ClusterCountertrend.cs" />
     <Compile Include="Robots\High Frequency\HighFrequencyTrader.cs" />
@@ -1161,6 +1166,10 @@
     <Page Include="Robots\aDemo\DemoBullishEngulfingUi.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Robots\aDev\PingBotUi.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Robots\CounterTrend\StrategyBollingerUi.xaml">
       <SubType>Designer</SubType>
