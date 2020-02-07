@@ -99,6 +99,7 @@ namespace OsEngine.Robots.aDev
             if (!CommonFuns.isWorkingTimeNow(lastCandle.TimeStart, workingMode)) return;
 
 
+            //закрываем позу, если есть
             List<Position> positions = tab0.PositionsOpenAll;
             if (positions != null
                 && positions.Count != 0)
