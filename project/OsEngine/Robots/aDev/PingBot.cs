@@ -38,11 +38,11 @@ namespace OsEngine.Robots.aDev
         {
 
             //инициализируем настройки
-            isOn = true;
-            workingMode = WorkingModeType.MoscowExchange_Forts;
-            onlyLongTrades = false;
+            isOn = false;
+            workingMode = WorkingModeType.MoscowExchange_Stocks;
+            onlyLongTrades = true;
             countTradesAtStart = 1;
-            countTradesAtRandomTime = 2;
+            countTradesAtRandomTime = 0;
 
             Load();
 
