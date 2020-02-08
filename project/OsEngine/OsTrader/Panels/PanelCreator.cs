@@ -39,14 +39,14 @@ namespace OsEngine.OsTrader.Panels
             result.Add("DevPingBot");
 
             //аDemo: Мои учебные роботы
-            result.Add("DemoHammer");
-            result.Add("DemoThreeSoldiers");
-            result.Add("DemoRobot1");
-            result.Add("DemoRobot2");
-            result.Add("DemoHammerArbitrage");
-            result.Add("DemoBullishEngulfing");
-            result.Add("DemoMovingAverage");
-            result.Add("DemoTrendEnvelopes");
+            //result.Add("DemoHammer");
+            //result.Add("DemoThreeSoldiers");
+            //result.Add("DemoRobot1");
+            //result.Add("DemoRobot2");
+            //result.Add("DemoHammerArbitrage");
+            //result.Add("DemoBullishEngulfing");
+            //result.Add("DemoMovingAverage");
+            //result.Add("DemoTrendEnvelopes");
 
 
             result.Add("Engine");
