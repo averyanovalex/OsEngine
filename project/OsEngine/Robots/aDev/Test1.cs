@@ -8,6 +8,7 @@ using OsEngine.Entity;
 using OsEngine.Market;
 using OsEngine.OsTrader.Panels;
 using OsEngine.OsTrader.Panels.Tab;
+using System.Windows.Forms.DataVisualization.Charting;
 
 namespace OsEngine.Robots.aDev
 {
@@ -15,6 +16,7 @@ namespace OsEngine.Robots.aDev
     {
 
         public LineHorisontal _line;
+        public PointElement _point;
         
         public Test1(string name, StartProgram startProgram) : base(name, startProgram)
         {
@@ -31,6 +33,17 @@ namespace OsEngine.Robots.aDev
             };
             TabsSimple[0].SetChartElement(_line);
 
+            _point = new PointElement("point", "Prime")
+            {
+                Color = Color.Red,
+                Size = 20,
+                Style = MarkerStyle.Star6,
+                TimePoint = new DateTime(2019, 1, 4, 14, 0, 0),
+                Y = 19450
+            };
+
+            TabsSimple[0].SetChartElement(_point);
+
 
             TabsSimple[0].CandleFinishedEvent += Test1_CandleFinishedEvent;
 
@@ -39,6 +52,7 @@ namespace OsEngine.Robots.aDev
         private void Test1_CandleFinishedEvent(List<Candle> candles)
         {
             _line.Refresh();
+            _point.Refresh();
         }
 
         public override string GetNameStrategyType()
