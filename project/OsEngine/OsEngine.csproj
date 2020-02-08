@@ -656,6 +656,7 @@
     <Compile Include="Robots\aDev\PingBotUi.xaml.cs">
       <DependentUpon>PingBotUi.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Robots\aDev\Test1.cs" />
     <Compile Include="Robots\aLibs\CommonFuncs.cs" />
     <Compile Include="Robots\BotFactory.cs" />
     <Compile Include="Robots\CounterTrend\ClusterCountertrend.cs" />
