@@ -38,6 +38,7 @@ namespace OsEngine.OsTrader.Panels
             //aDev, aProd: Мои боевые роботы
             result.Add("DevPingBot");
             result.Add("Test1");
+            result.Add("Test2");
 
             //аDemo: Мои учебные роботы
             //result.Add("DemoHammer");
@@ -94,6 +95,12 @@ namespace OsEngine.OsTrader.Panels
             {
                 bot = new Test1(name, startProgram);
             }
+            if (nameClass == "Test2")
+            {
+                bot = new Test2(name, startProgram);
+            }
+
+
 
             //аDemo: Мои учебные роботы
             if (nameClass == "DemoHammer")
