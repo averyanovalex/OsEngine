@@ -8,6 +8,7 @@ using OsEngine.Entity;
 using OsEngine.Market;
 using OsEngine.OsTrader.Panels;
 using OsEngine.OsTrader.Panels.Tab;
+using OsEngine.Robots.aLibraries.Levels;
 
 namespace OsEngine.Robots.aDev
 {
@@ -29,126 +30,7 @@ namespace OsEngine.Robots.aDev
     //4.Уровни в пределах люфта надо объединять в один повторяющийся (+балл)
     //
 
-    public enum ExtremumTypes
-    {
-        Low,    //уровень поддержки
-        High  //уровень сопротивления
-    }
-
-    public class Extremum
-    {
-        public DateTime time;
-        public TimeSpan timeFrame;
-        public ExtremumTypes type;
-        public decimal value;
-        private LineHorisontal lineOnChart;
-
-        public Extremum(DateTime time, TimeSpan timeFrame, ExtremumTypes type, decimal value=0)
-        {
-            this.time = time;
-            this.type = type;
-            this.value = value;
-            this.timeFrame = timeFrame;
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (obj == null)
-                return false;
-            
-            Extremum e = obj as Extremum;
-            if (e == null)
-            {
-                return false;
-            }
-
-            return e.time == this.time && e.type == this.type && e.timeFrame == this.timeFrame;
-        }
-
-
-        private void DrawLine(BotTabSimple chart, decimal value, string name, DateTime timeStart, DateTime timeEnd)
-        {
-
-            lineOnChart = new LineHorisontal(name, "Prime", false)
-            {
-                Color = Color.Green,
-                Value = value,
-                TimeStart = timeStart,
-                TimeEnd = timeEnd
-            };
-            chart.SetChartElement(lineOnChart);
-            //lineOnChart.Refresh();
-        }
-
-        public void DrawOnChart(BotTabSimple chart)
-        {
-            DateTime timeStart = time.AddSeconds(-1 * timeFrame.TotalSeconds);
-            DateTime timeEnd = time.AddSeconds(+1 * timeFrame.TotalSeconds);
-            string levelName = "level " + Convert.ToString(time);
-            DrawLine(chart, value, levelName, timeStart, timeEnd);
-        }
-
-        public void DeleteFromChart(BotTabSimple chart)
-        {
-            chart.DeleteChartElement(lineOnChart);
-            lineOnChart = null;
-        }
-
-        public void RefreshOnChart()
-        {
-            lineOnChart.Refresh();
-        }
-        
-    }
-
-
-
-    public class ExtremumsSet
-    {
-        private List<Extremum> items;
-        private BotTabSimple chart;
-
-        public ExtremumsSet(BotTabSimple chart)
-        {
-            this.chart = chart;
-            
-            items = new List<Extremum>();
-        }
-
-        public void Add(Extremum newItem)
-        {
-            if (items.Contains(newItem))
-            {
-                return;
-            }
-            else
-            {
-                items.Add(newItem);
-                newItem.DrawOnChart(chart);
-                
-                //удаляем, если есть уже лишний экстремум на предыдущем баре
-                DateTime date = newItem.time.AddSeconds(-1 * newItem.timeFrame.TotalSeconds);
-
-                var mustBeDeleted = items.Find(item => item.time == date && item.timeFrame == newItem.timeFrame 
-                                                    && item.type == newItem.type);
-                
-                if (mustBeDeleted != null)
-                {
-                    mustBeDeleted.DeleteFromChart(chart);
-                    items.Remove(mustBeDeleted);
-                }
-
-            }
-        }
-
-        public void RefreshAllExtremumsOnChart()
-        {
-            foreach (Extremum item in items)
-            {
-                item.RefreshOnChart();
-            }
-        }
-    }
+ 
 
 
     class Test2 : BotPanel
@@ -167,7 +49,7 @@ namespace OsEngine.Robots.aDev
         {
 
             //инициализация параметров
-            candlesDepth = 100;
+            candlesDepth = 50;
             candlesForSearchExtremums = 2;
 
 
@@ -175,61 +57,13 @@ namespace OsEngine.Robots.aDev
             TabCreate(BotTabType.Simple);
             tab0 = TabsSimple[0];
 
-            extremums = new ExtremumsSet(tab0) ;
+            extremums = new ExtremumsSet(tab0, candlesDepth);
 
 
 
             tab0.CandleFinishedEvent += Tab0_CandleFinishedEvent;
 
         }
-
-        private bool isExtremum(ExtremumTypes extremumType, List<Candle> candles, 
-                                    int index, int leftRightCandlesCount)
-        {
-            decimal candleLow = candles[index].Low;
-            decimal candleHigh = candles[index].High;
-
-            //смотрим слева
-            int indexStart = index - leftRightCandlesCount;
-            int indexEnd = index - 1;
-            for (int i = indexStart; i <= indexEnd; i++)
-            {
-                if (extremumType == ExtremumTypes.Low)  
-                {
-                    if (candles[i].Low < candleLow) return false;
-                }
-                else
-                {
-                    if (candles[i].High > candleHigh) return false;
-                }            
-            }
-
-            //если это крайний бар, смотреть справо не надо
-            if (index == candles.Count - 1)
-            {
-                return true;
-            }
-
-            //смотрим справа
-            indexStart = index + 1;
-            indexEnd = index + leftRightCandlesCount;
-            indexEnd = indexEnd > candles.Count - 1 ? candles.Count - 1 : indexEnd;
-            for (int i = indexStart; i <= indexEnd; i++)
-            {
-                if (extremumType == ExtremumTypes.Low)
-                {
-                    if (candles[i].Low < candleLow) return false;
-                }
-                else
-                {
-                    if (candles[i].High > candleHigh) return false;
-                }
-            }
-
-            //похоже у проверямой свечи самый низкий Low или самый высокий High
-            return true;
-        }
-
 
 
         private void Tab0_CandleFinishedEvent(List<Candle> candles)
@@ -238,40 +72,8 @@ namespace OsEngine.Robots.aDev
             if (candles.Count < 10) return;
 
             //ищем экстремумы     
-            List<int> lowExtremums = new List<int>();
-            List<int> HighExtremums = new List<int>();
-            tab0.DeleteAllChartElement();
-
-            int indexStart = candles.Count - candlesDepth + 1;
-            indexStart = indexStart < candlesForSearchExtremums ? candlesForSearchExtremums : indexStart;
-            int indexEnd = candles.Count - 1;
-
-            for (int i = indexStart; i <= indexEnd; i++)
-            {
-                if (isExtremum(ExtremumTypes.Low, candles, i, candlesForSearchExtremums))
-                {
-                    
-                    Extremum newExtremum = new Extremum(candles[i].TimeStart, 
-                                                        tab0.TimeFrame, 
-                                                        ExtremumTypes.Low, 
-                                                        candles[i].Low);
-
-                    extremums.Add(newExtremum);
-                }
-
-                if (isExtremum(ExtremumTypes.High, candles, i, candlesForSearchExtremums))
-                {
-                    Extremum newExtremum = new Extremum(candles[i].TimeStart,
-                                                        tab0.TimeFrame,
-                                                        ExtremumTypes.High,
-                                                        candles[i].High);
-
-                    extremums.Add(newExtremum);
-                }
-
-            }
-
-            //extremums.RefreshAllExtremumsOnChart();
+            Extremum.FindExtremums(extremums, tab0, candles, candlesDepth, candlesForSearchExtremums);
+            extremums.RefreshAllExtremumsOnChart();
 
         }
 
