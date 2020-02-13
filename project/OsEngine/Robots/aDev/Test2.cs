@@ -21,13 +21,12 @@ namespace OsEngine.Robots.aDev
 
 
     //ToDo:
-    //0.Выносим в отдельную библиотеку "Уровни", делаем общий предок для прориросовки. 
-    //Отключаемая пророисовка только у значимых сейчас экстремумов и уровней
-    //Ошибка с повтороной прорисовкой
-    //1.Найти экстремумы
-    //2.Найти уровни от экстремумов по пунктам 2-5
-    //3.Сделать условный вход для с шансами 3к1+ для тестов
-    //4.Уровни в пределах люфта надо объединять в один повторяющийся (+балл)
+    //1.Ищем уровни копейка в копейку
+    //2.Ищем уровни в одну цену с учетом люфта
+    //3.Ищем уровни в одну цену с учетом люфта и проколов хвостами
+    //4.Ищем уровни с учетом люфта, проколов и ложных пробоев телами
+    //5.Сделать условный вход для с шансами 3к1+ для тестов
+    //6.Уровни в пределах люфта надо объединять в один повторяющийся (+балл)
     //
 
  
@@ -57,7 +56,7 @@ namespace OsEngine.Robots.aDev
             TabCreate(BotTabType.Simple);
             tab0 = TabsSimple[0];
 
-            extremums = new ExtremumsSet(tab0, candlesDepth);
+            extremums = new ExtremumsSet(tab0, candlesDepth, true);
 
 
 
@@ -68,8 +67,18 @@ namespace OsEngine.Robots.aDev
 
         private void Tab0_CandleFinishedEvent(List<Candle> candles)
         {
+            
+            if (candles.Count < 10)
+            {             
+                if (extremums.Count > 0)
+                {  // если это перезапуск теста, обнуляем экстремумы
+                    extremums = new ExtremumsSet(tab0, candlesDepth, true);
+                    tab0.DeleteAllChartElement();
+                }
 
-            if (candles.Count < 10) return;
+                return;
+            }
+                
 
             //ищем экстремумы     
             Extremum.FindExtremums(extremums, tab0, candles, candlesDepth, candlesForSearchExtremums);

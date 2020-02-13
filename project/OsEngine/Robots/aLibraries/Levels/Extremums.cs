@@ -218,10 +218,13 @@ namespace OsEngine.Robots.aLibraries.Levels
             set { }
         }
 
-        public ExtremumsSet(BotTabSimple chart, int candlesDepth)
+        public bool AutomaticlyDrawOnChart { get; set; }
+
+        public ExtremumsSet(BotTabSimple chart, int candlesDepth, bool automaticlyDrawOnChart = false)
         {
             this.chart = chart;
             this.candlesDepth = candlesDepth;
+            this.AutomaticlyDrawOnChart = automaticlyDrawOnChart;
 
             items = new List<Extremum>();
         }
@@ -236,7 +239,13 @@ namespace OsEngine.Robots.aLibraries.Levels
             else
             {
                 items.Add(newItem);
-                newItem.DrawOnChart();
+
+                if (AutomaticlyDrawOnChart)
+                {
+                    newItem.DrawOnChart();
+                }
+                
+                
 
                 //удаляем, если есть уже лишний экстремум на предыдущем баре
                 DateTime date = newItem.time.AddSeconds(-1 * newItem.timeFrame.TotalSeconds);
@@ -246,7 +255,10 @@ namespace OsEngine.Robots.aLibraries.Levels
 
                 if (mustBeDeleted != null)
                 {
-                    mustBeDeleted.DeleteFromChart();
+                    if (AutomaticlyDrawOnChart) 
+                    {
+                        mustBeDeleted.DeleteFromChart();
+                    }           
                     items.Remove(mustBeDeleted);
                 }
 
@@ -257,7 +269,11 @@ namespace OsEngine.Robots.aLibraries.Levels
                 var listOfMustBeDeleted = items.FindAll(item => item.time < borderTime);
                 foreach (var item in listOfMustBeDeleted)
                 {
-                    item.DeleteFromChart();
+                 
+                    if (AutomaticlyDrawOnChart)
+                    {
+                        item.DeleteFromChart();
+                    }   
                     items.Remove(item);
                 }
 
@@ -266,6 +282,9 @@ namespace OsEngine.Robots.aLibraries.Levels
 
         public void RefreshAllExtremumsOnChart()
         {
+
+            if (!AutomaticlyDrawOnChart) return;
+
             foreach (Extremum item in items)
             {
                 item.RefreshOnChart();
