@@ -9,6 +9,13 @@ using System.Threading.Tasks;
 
 namespace OsEngine.Robots.aLibraries.Levels
 {
+    public enum HighLowLevelTypes
+    {
+        Low,
+        High
+    }
+
+
     abstract public class LevelLine
     {
         protected LineHorisontal lineOnChart;
@@ -19,12 +26,12 @@ namespace OsEngine.Robots.aLibraries.Levels
             this.chart = chart;
         }
 
-        protected void DrawLine(decimal value, string name, DateTime timeStart, DateTime timeEnd)
+        protected void DrawLine(decimal value, string name, DateTime timeStart, DateTime timeEnd, Color color)
         {
 
             lineOnChart = new LineHorisontal(name, "Prime", false)
             {
-                Color = Color.Green,
+                Color = color,
                 Value = value,
                 TimeStart = timeStart,
                 TimeEnd = timeEnd
