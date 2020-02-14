@@ -40,6 +40,7 @@ namespace OsEngine.Robots.aDev
         private int candlesDepth;  //количество свечей влево для поиска экстремумов
         private int candlesForSearchExtremums;  //количество свечей слева и справа для поиска поиска экстремума
         private int candlesOnLevelCount; //количество баров для подтверждения воздушного уровня
+        private int slackOfCandlesOnLevel; //люфт добития или не добития цены до уровня (в пунктах)
 
 
 
@@ -54,6 +55,7 @@ namespace OsEngine.Robots.aDev
             candlesDepth = 50;
             candlesForSearchExtremums = 2;
             candlesOnLevelCount = 4;
+            slackOfCandlesOnLevel = 3;
 
 
             TabCreate(BotTabType.Simple);
@@ -72,7 +74,7 @@ namespace OsEngine.Robots.aDev
         {
 
             int stop = 10;
-            int take = 30;
+            int take = 50;
             
             if (position.Direction == Side.Buy)
             {
@@ -136,7 +138,7 @@ namespace OsEngine.Robots.aDev
             extremums.RefreshAllExtremumsOnChart();
 
             //ищем воздушные четкие уровни
-            AirLevel.FindAirExactLevels(levels, extremums, tab0, candles, candlesDepth, candlesOnLevelCount);
+            AirLevel.FindAirExactLevels(levels, extremums, tab0, candles, candlesDepth, candlesOnLevelCount, slackOfCandlesOnLevel);
             levels.RefreshAllExtremumsOnChart();
 
             //если последний уровень на последнем баре - входим

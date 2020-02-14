@@ -8,6 +8,15 @@ using System.Drawing;
 
 namespace OsEngine.Robots.aLibraries.Levels
 {
+    
+    public enum AirLevelTypes
+    {
+        Penny_To_Penny, //копейка в копейку
+        Exact_With_Slack //точный в учетом люфта
+    } 
+
+    
+    
     //description:
     //Класс определяем такую сущность как воздушный уровень
     public class AirLevel : LevelLine
@@ -18,7 +27,7 @@ namespace OsEngine.Robots.aLibraries.Levels
         public DateTime timeStart;
         public DateTime timeEnd;
         public HighLowLevelTypes highLowType;
-        //Тип копейка в копейку или нет
+        public AirLevelTypes levelType;
         public decimal value;
         public List<Candle> confirmingCandles;
 
@@ -66,13 +75,30 @@ namespace OsEngine.Robots.aLibraries.Levels
         public override void DrawOnChart()
         {
             string levelName = "level " + Convert.ToString(timeStart);
-            DrawLine(value, levelName, timeStart, timeEnd, Color.Red);
+            DrawLine(value, levelName, timeStart, timeEnd, Color.Blue);
         }
 
         #endregion
 
 
         #region static
+
+        private static  void CheckCandles(List<Candle> candlesOnLevel, List<Candle> candles, int indexStart, int indexEnd, bool itsLowExtremum, decimal checkPrice, int slack)
+        {
+
+            for (int j =  indexStart; j <= indexEnd; j++)
+            {
+                decimal price = itsLowExtremum ? candles[j].Low : candles[j].High;
+                decimal delta = Math.Abs(price - checkPrice);
+
+                if (delta <= slack)
+                {
+                    candlesOnLevel.Add(candles[j]);
+                }
+
+            }
+
+        }
 
         public static bool ItsAirExactLevel(Extremum extremum, int candlesCount, List<Candle> candles, out List<Candle> candlesOnLevel)
         {
@@ -91,15 +117,13 @@ namespace OsEngine.Robots.aLibraries.Levels
 
 
                 candlesOnLevel = new List<Candle>();
-                for (int j = i - candlesCount + 1; j <= i; j++)
-                {
-                    decimal price = itsLowExtremum ? candles[j].Low : candles[j].High;
-                    if (price == extremumPrice)
-                    {
-                        candlesOnLevel.Add(candles[j]);
-                    }
+                int indexStart = i - candlesCount + 1;
+                int indexEnd = i;
 
-                }
+
+                //проверяем "копейка-в-копейку"
+                CheckCandles(candlesOnLevel, candles, indexStart, indexEnd, itsLowExtremum, extremumPrice, 0);
+
 
                 if (candlesOnLevel.Count == candlesCount)
                 {
@@ -112,8 +136,54 @@ namespace OsEngine.Robots.aLibraries.Levels
             return false;
         }
 
+
+
+        public static bool ItsAirExactLevelWithSlack(Extremum extremum, int candlesCount, List<Candle> candles, int slack, out List<Candle> candlesOnLevel)
+        {
+
+            Candle candle = extremum.candle;
+            int index = candles.IndexOf(candle);
+            decimal extremumPrice = extremum.value;
+            bool itsLowExtremum = extremum.type == HighLowLevelTypes.Low;
+
+            int rightExtremeIndex = index + candlesCount - 1;
+
+
+            for (int i = rightExtremeIndex; i >= index; i--)
+            {
+                if (i > candles.Count - 1) continue;
+
+
+                
+                int indexStart = i - candlesCount + 1;
+                int indexEnd = i;
+
+
+                int koef = itsLowExtremum ? 1 : -1;
+
+                    
+                for (int k = 1; k <= slack; k++)
+                {
+                    candlesOnLevel = new List<Candle>();
+                    decimal price = extremumPrice + k * koef;
+                    CheckCandles(candlesOnLevel, candles, indexStart, indexEnd, itsLowExtremum, extremumPrice, slack);
+
+                    if (candlesOnLevel.Count == candlesCount)
+                    {
+                        return true;
+                    }
+                }
+                
+            }
+
+            candlesOnLevel = null;
+            return false;
+        }
+
+
+
         public static void FindAirExactLevels(AirLevelsSet levels, ExtremumsSet extremums, BotTabSimple chart, List<Candle> candles,
-                                           int candlesDepth, int candlesOnLevelCount)
+                                           int candlesDepth, int candlesOnLevelCount, int slack)
         {
 
             if (levels == null)
@@ -127,6 +197,7 @@ namespace OsEngine.Robots.aLibraries.Levels
                 if (extremum.marked) continue;
 
                 List<Candle> candlesOnLevel;
+                
                 if (AirLevel.ItsAirExactLevel(extremum, candlesOnLevelCount, candles, out candlesOnLevel))
                 {
                     extremum.marked = true;
@@ -134,8 +205,24 @@ namespace OsEngine.Robots.aLibraries.Levels
                     var timeStart = candlesOnLevel[0].TimeStart;
                     var timeEnd = candlesOnLevel[candlesOnLevel.Count-1].TimeStart;
                     AirLevel newLevel = new AirLevel(chart, timeStart, timeEnd, extremum.type, extremum.value, candlesOnLevel);
+                    newLevel.levelType = AirLevelTypes.Penny_To_Penny;
+                    levels.Add(newLevel);
+                    return;
+                }
+
+                candlesOnLevel = null;
+
+                if (AirLevel.ItsAirExactLevelWithSlack(extremum, candlesOnLevelCount, candles, slack, out candlesOnLevel))
+                {
+                    extremum.marked = true;
+
+                    var timeStart = candlesOnLevel[0].TimeStart;
+                    var timeEnd = candlesOnLevel[candlesOnLevel.Count - 1].TimeStart;
+                    AirLevel newLevel = new AirLevel(chart, timeStart, timeEnd, extremum.type, extremum.value, candlesOnLevel);
+                    newLevel.levelType = AirLevelTypes.Exact_With_Slack;
 
                     levels.Add(newLevel);
+                    return;
                 }
             }
 
