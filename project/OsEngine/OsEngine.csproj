@@ -658,6 +658,7 @@
     </Compile>
     <Compile Include="Robots\aDev\Test1.cs" />
     <Compile Include="Robots\aDev\Test2.cs" />
+    <Compile Include="Robots\aDev\Test4Candles.cs" />
     <Compile Include="Robots\aLibraries\Levels\AirLevels.cs" />
     <Compile Include="Robots\aLibraries\Levels\Extremums.cs" />
     <Compile Include="Robots\aLibraries\Levels\LevelLine.cs" />
