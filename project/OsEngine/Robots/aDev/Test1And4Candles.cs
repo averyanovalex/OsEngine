@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Windows.Forms.DataVisualization.Charting;
 using OsEngine.Charts.CandleChart.Elements;
 using OsEngine.Entity;
 using OsEngine.Market;
@@ -9,8 +10,13 @@ using OsEngine.OsTrader.Panels;
 using OsEngine.OsTrader.Panels.Tab;
 
 namespace OsEngine.Robots.aDev
+
+    //Гипотезы:
+    //1.Проверить связь с трендом
+    //2.Доработать управление позицией
+    //3.Вылизать алгоритм, добавить рабочие ограничения, оптимизировать
 {
-    class Test4Candles : BotPanel
+    class Test1And4Candles : BotPanel
     {
 
         private BotTabSimple tab0;
@@ -18,7 +24,7 @@ namespace OsEngine.Robots.aDev
         private DateTime timeStopOrder;
 
 
-        public Test4Candles(string name, StartProgram startProgram) : base(name, startProgram)
+        public Test1And4Candles(string name, StartProgram startProgram) : base(name, startProgram)
         {
 
             TabCreate(BotTabType.Simple);
@@ -68,26 +74,36 @@ namespace OsEngine.Robots.aDev
             tab0.SetChartElement(lineOnChart);
         }
 
-        private decimal minVal(decimal val1, decimal val2, decimal val3, decimal val4, decimal val5, decimal val6)
+        private void DrawPoint(decimal value, string name, DateTime time, Color color)
+        {
+
+            var pointOnChart = new PointElement(name, "Prime")
+            {
+                Color = color,
+                Size = 10,
+                Style = MarkerStyle.Star6,
+                TimePoint = time,
+                Y = value
+            };
+
+            tab0.SetChartElement(pointOnChart);
+        }
+
+        private decimal minVal(decimal val1, decimal val2)
         {
             var min = val1;
             if (val2 < min) min = val2;
-            if (val3 < min) min = val3;
-            if (val4 < min) min = val4;
-            if (val5 < min) min = val5;
-            if (val6 < min) min = val6;
+  
 
             return min;
         }
 
-        private decimal maxVal(decimal val1, decimal val2, decimal val3, decimal val4, decimal val5, decimal val6)
+        private decimal maxVal(decimal val1, decimal val2)
         {
             var max = val1;
             if (val2 > max) max = val2;
-            if (val3 > max) max = val3;
-            if (val4 > max) max = val4;
-            if (val5 > max) max = val5;
-            if (val6 > max) max = val6;
+            
+           
 
             return max;
         }
@@ -96,7 +112,7 @@ namespace OsEngine.Robots.aDev
         {
 
             //parametres
-            var slack = 3;
+            var slack = 1;
 
 
             List<Position> positions = tab0.PositionsOpenAll;
@@ -107,40 +123,35 @@ namespace OsEngine.Robots.aDev
             }
 
 
-            if (candles.Count < 7) return;
+            if (candles.Count < 10) return;
 
 
-            var candle1 = candles[candles.Count - 6];
-            var candle2 = candles[candles.Count - 5];
-            var candle3 = candles[candles.Count - 4];
-            var candle4 = candles[candles.Count - 3];
-            var candle5 = candles[candles.Count - 2];
-            var candle6 = candles[candles.Count - 1];
+            var candle1 = candles[candles.Count - 2];
+            var candle2 = candles[candles.Count - 1];
+            
+            
 
 
             //проверяем на Low
             var low1 = candle1.Low;
             var low2 = candle2.Low;
-            var low3 = candle3.Low;
-            var low4 = candle4.Low;
-            var low5 = candle5.Low;
-            var low6 = candle6.Low;
+            
+            
+
 
             var body1 = Math.Min(candle1.Close, candle1.Open);
             var body2 = Math.Min(candle2.Close, candle2.Open);
-            var body3 = Math.Min(candle3.Close, candle3.Open);
-            var body4 = Math.Min(candle4.Close, candle4.Open);
-            var body5 = Math.Min(candle5.Close, candle5.Open);
-            var body6 = Math.Min(candle6.Close, candle6.Open);
+            
+            
 
-            var checkPrice = maxVal(low1, low2, low3, low4, low5, low6);
+
+            var checkPrice = maxVal(low1, low2);
 
             var delta1 = Math.Abs(low1 - checkPrice);
             var delta2 = Math.Abs(low2 - checkPrice);
-            var delta3 = Math.Abs(low3 - checkPrice);
-            var delta4 = Math.Abs(low4 - checkPrice);
-            var delta5 = Math.Abs(low3 - checkPrice);
-            var delta6 = Math.Abs(low4 - checkPrice);
+            
+            
+
 
             var touch = 0;
             var prokol = 0;
@@ -155,55 +166,56 @@ namespace OsEngine.Robots.aDev
             else if (body2 > checkPrice && low2 < checkPrice) prokol++;
             else error++;
 
-            if (delta3 <= slack && body3 > checkPrice) touch++;
-            else if (body3 > checkPrice && low3 < checkPrice) prokol++;
-            else error++;
 
-            if (delta4 <= slack && body4 > checkPrice) touch++;
-            else if (body4 > checkPrice && low4 < checkPrice) prokol++;
-            else error++;
+            
 
-            if (delta5 <= slack && body5 > checkPrice) touch++;
-            else if (body5 > checkPrice && low5 < checkPrice) prokol++;
-            else error++;
+            //Ищем ТВХ
+            var indexStart = candles.Count - 54;
+            indexStart = indexStart < 0 ? 0 : indexStart;
 
-            if (delta6 <= slack && body6 > checkPrice) touch++;
-            else if (body6 > checkPrice && low6 < checkPrice) prokol++;
-            else error++;
-
-
-            if (touch >= 4 && prokol <= 2 && error == 0)
+            var tvh = 0;
+            Candle tvhCandle = null;
+            for (int i = candles.Count-5; i>= indexStart; i--)
             {
-                DrawLine(checkPrice, $"line-{Convert.ToString(candle1.TimeStart)}", candle1.TimeStart, candle6.TimeStart, Color.Blue);
-                tab0.BuyAtLimit(1, checkPrice + slack);
+                if (candles[i].Low == low1 || candles[i].High == low1)
+                {
+                    tvh = 1;
+                    tvhCandle = candles[i];
+                    break;
+                }
+            }
+
+
+            if (touch == 2  && prokol <= 0 && error == 0 && tvh == 1)
+            {
+
+                var slack_order = 4;
+                
+                DrawLine(checkPrice, $"line-{Convert.ToString(candle1.TimeStart)}", candle1.TimeStart, candle2.TimeStart, Color.Blue);
+                DrawPoint(tvhCandle.Low - 20, $"point-{Convert.ToString(tvhCandle.TimeStart)}", tvhCandle.TimeStart, Color.Yellow);
+                tab0.BuyAtLimit(1, checkPrice + slack_order);
                 return;
             }
-            
 
-            
-            //проверяем на High
+            return;
+
+            //ШОРТ
+
             var high1 = candle1.High;
             var high2 = candle2.High;
-            var high3 = candle3.High;
-            var high4 = candle4.High;
-            var high5 = candle5.High;
-            var high6 = candle6.High;
+
 
             body1 = Math.Max(candle1.Close, candle1.Open);
             body2 = Math.Max(candle2.Close, candle2.Open);
-            body3 = Math.Max(candle3.Close, candle3.Open);
-            body4 = Math.Max(candle4.Close, candle4.Open);
-            body5 = Math.Max(candle5.Close, candle5.Open);
-            body6 = Math.Max(candle6.Close, candle6.Open);
 
-            checkPrice = minVal(high1, high2, high3, high4, high5, high6);
+
+
+
+            checkPrice = minVal(high1, high2);
 
             delta1 = Math.Abs(high1 - checkPrice);
             delta2 = Math.Abs(high2 - checkPrice);
-            delta3 = Math.Abs(high3 - checkPrice);
-            delta4 = Math.Abs(high4 - checkPrice);
-            delta5 = Math.Abs(high5 - checkPrice);
-            delta6 = Math.Abs(high6 - checkPrice);
+
 
             touch = 0;
             prokol = 0;
@@ -218,35 +230,44 @@ namespace OsEngine.Robots.aDev
             else if (body2 < checkPrice && high2 > checkPrice) prokol++;
             else error++;
 
-            if (delta3 <= slack && body3 < checkPrice) touch++;
-            else if (body3 < checkPrice && high3 > checkPrice) prokol++;
-            else error++;
 
-            if (delta4 <= slack && body4 < checkPrice) touch++;
-            else if (body4 < checkPrice && high4 > checkPrice) prokol++;
-            else error++;
 
-            if (delta5 <= slack && body5 < checkPrice) touch++;
-            else if (body5 < checkPrice && high5 > checkPrice) prokol++;
-            else error++;
 
-            if (delta6 <= slack && body6 < checkPrice) touch++;
-            else if (body6 < checkPrice && high6 > checkPrice) prokol++;
-            else error++;
+            //Ищем ТВХ
+            indexStart = candles.Count - 54;
+            indexStart = indexStart < 0 ? 0 : indexStart;
 
-            
-            if (touch >= 4 && prokol <= 2 && error == 0)
+            tvh = 0;
+            tvhCandle = null;
+            for (int i = candles.Count - 5; i >= indexStart; i--)
             {
-                DrawLine(checkPrice, $"line-{Convert.ToString(candle1.TimeStart)}", candle1.TimeStart, candle6.TimeStart, Color.Yellow);
-                tab0.SellAtLimit(1, checkPrice - slack);
+                if (candles[i].Low == high1 || candles[i].High == high1)
+                {
+                    tvh = 1;
+                    tvhCandle = candles[i];
+                    break;
+                }
+            }
+
+
+            if (touch == 2 && prokol <= 0 && error == 0 && tvh == 1)
+            {
+
+                var slack_order = 4;
+
+                DrawLine(checkPrice, $"line-{Convert.ToString(candle1.TimeStart)}", candle1.TimeStart, candle2.TimeStart, Color.Red);
+                DrawPoint(tvhCandle.High + 20, $"point-{Convert.ToString(tvhCandle.TimeStart)}", tvhCandle.TimeStart, Color.Red);
+                tab0.SellAtLimit(1, checkPrice - slack_order);
                 return;
             }
+
+
 
         }
 
         public override string GetNameStrategyType()
         {
-            return "Test4Candles";
+            return "Test1And4Candles";
         }
 
 
