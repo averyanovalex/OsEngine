@@ -10,7 +10,7 @@ using OsEngine.OsTrader.Panels.Tab;
 
 namespace OsEngine.Robots.aDev
 {
-    class Test4Candles : BotPanel
+    class Test6Candles : BotPanel
     {
 
         private BotTabSimple tab0;
@@ -18,7 +18,7 @@ namespace OsEngine.Robots.aDev
         private DateTime timeStopOrder;
 
 
-        public Test4Candles(string name, StartProgram startProgram) : base(name, startProgram)
+        public Test6Candles(string name, StartProgram startProgram) : base(name, startProgram)
         {
 
             TabCreate(BotTabType.Simple);
@@ -103,13 +103,6 @@ namespace OsEngine.Robots.aDev
             if (positions != null && positions.Count != 0)
             {
                 
-                //if (positions[0].State == PositionStateType.Opening && tab0.TimeServerCurrent >= timeStopOrder)
-                //{
-                //    tab0.CloseAllOrderToPosition(positions[0]);
-                //}
-                
- 
-                
                 return;
             }
 
@@ -146,8 +139,8 @@ namespace OsEngine.Robots.aDev
             var delta2 = Math.Abs(low2 - checkPrice);
             var delta3 = Math.Abs(low3 - checkPrice);
             var delta4 = Math.Abs(low4 - checkPrice);
-            var delta5 = Math.Abs(low3 - checkPrice);
-            var delta6 = Math.Abs(low4 - checkPrice);
+            var delta5 = Math.Abs(low5 - checkPrice);
+            var delta6 = Math.Abs(low6 - checkPrice);
 
             var touch = 0;
             var prokol = 0;
@@ -187,35 +180,73 @@ namespace OsEngine.Robots.aDev
             }
             
 
-            /*
+            
             //проверяем на High
             var high1 = candle1.High;
             var high2 = candle2.High;
             var high3 = candle3.High;
             var high4 = candle4.High;
+            var high5 = candle5.High;
+            var high6 = candle6.High;
 
-            var max = minVal(high1, high2, high3, high4);
+            body1 = Math.Max(candle1.Close, candle1.Open);
+            body2 = Math.Max(candle2.Close, candle2.Open);
+            body3 = Math.Max(candle3.Close, candle3.Open);
+            body4 = Math.Max(candle4.Close, candle4.Open);
+            body5 = Math.Max(candle5.Close, candle5.Open);
+            body6 = Math.Max(candle6.Close, candle6.Open);
 
-            delta1 = Math.Abs(high1 - max);
-            delta2 = Math.Abs(high2 - max);
-            delta3 = Math.Abs(high3 - max);
-            delta4 = Math.Abs(high4 - max);
+            checkPrice = minVal(high1, high2, high3, high4, high5, high6);
 
-            if ((delta1 <= slack) && (delta2 <= slack) && (delta3 <= slack) && (delta4 <= slack))
+            delta1 = Math.Abs(high1 - checkPrice);
+            delta2 = Math.Abs(high2 - checkPrice);
+            delta3 = Math.Abs(high3 - checkPrice);
+            delta4 = Math.Abs(high4 - checkPrice);
+            delta5 = Math.Abs(high5 - checkPrice);
+            delta6 = Math.Abs(high6 - checkPrice);
+
+            touch = 0;
+            prokol = 0;
+            error = 0;
+
+
+            if (delta1 <= slack && body1 < checkPrice) touch++;
+            else if (body1 < checkPrice && high1 > checkPrice) prokol++;
+            else error++;
+
+            if (delta2 <= slack && body2 < checkPrice) touch++;
+            else if (body2 < checkPrice && high2 > checkPrice) prokol++;
+            else error++;
+
+            if (delta3 <= slack && body3 < checkPrice) touch++;
+            else if (body3 < checkPrice && high3 > checkPrice) prokol++;
+            else error++;
+
+            if (delta4 <= slack && body4 < checkPrice) touch++;
+            else if (body4 < checkPrice && high4 > checkPrice) prokol++;
+            else error++;
+
+            if (delta5 <= slack && body5 < checkPrice) touch++;
+            else if (body5 < checkPrice && high5 > checkPrice) prokol++;
+            else error++;
+
+            if (delta6 <= slack && body6 < checkPrice) touch++;
+            else if (body6 < checkPrice && high6 > checkPrice) prokol++;
+            else error++;
+
+            
+            if (touch >= 4 && prokol <= 2 && error == 0)
             {
-                DrawLine(max, $"line-{Convert.ToString(candle1.TimeStart)}", candle1.TimeStart, candle4.TimeStart, Color.Green);
-                tab0.SellAtLimit(1, max - slack);
-                timeStopOrder = tab0.TimeServerCurrent.AddSeconds(tab0.TimeFrame.TotalSeconds * 2);
+                DrawLine(checkPrice, $"line-{Convert.ToString(candle1.TimeStart)}", candle1.TimeStart, candle6.TimeStart, Color.Yellow);
+                tab0.SellAtLimit(1, checkPrice - slack);
+                return;
             }
-
-
-            */
 
         }
 
         public override string GetNameStrategyType()
         {
-            return "Test4Candles";
+            return "Test6Candles";
         }
 
 

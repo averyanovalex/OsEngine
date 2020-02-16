@@ -39,7 +39,7 @@ namespace OsEngine.OsTrader.Panels
             result.Add("DevPingBot");
             result.Add("Test1");
             result.Add("Test2"); 
-            result.Add("Test4Candles");
+            result.Add("Test6Candles");
 
             //аDemo: Мои учебные роботы
             //result.Add("DemoHammer");
@@ -100,9 +100,9 @@ namespace OsEngine.OsTrader.Panels
             {
                 bot = new Test2(name, startProgram);
             }
-            if (nameClass == "Test4Candles")
+            if (nameClass == "Test6Candles")
             {
-                bot = new Test4Candles(name, startProgram);
+                bot = new Test6Candles(name, startProgram);
             }
 
 
