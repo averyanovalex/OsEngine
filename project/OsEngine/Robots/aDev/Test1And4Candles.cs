@@ -4,6 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Windows.Forms.DataVisualization.Charting;
 using OsEngine.Charts.CandleChart.Elements;
+using OsEngine.Charts.CandleChart.Indicators;
 using OsEngine.Entity;
 using OsEngine.Market;
 using OsEngine.OsTrader.Panels;
@@ -12,28 +13,75 @@ using OsEngine.OsTrader.Panels.Tab;
 namespace OsEngine.Robots.aDev
 
     //Гипотезы:
-    //1.Проверить связь с трендом
-    //2.Доработать управление позицией
+    //1.Доработать управление позицией
+    //2.Потестить на Ри, Си
     //3.Вылизать алгоритм, добавить рабочие ограничения, оптимизировать
 {
     class Test1And4Candles : BotPanel
     {
 
         private BotTabSimple tab0;
+        private BotTabSimple tab1;
 
-        private DateTime timeStopOrder;
+        private MovingAverage _moving;
+
+        private bool isLongTrend;
+        private bool isShortTrend;
 
 
         public Test1And4Candles(string name, StartProgram startProgram) : base(name, startProgram)
         {
 
             TabCreate(BotTabType.Simple);
+            TabCreate(BotTabType.Simple);
             tab0 = TabsSimple[0];
+            tab1 = TabsSimple[1];
+
+            _moving = new MovingAverage("moving1", false);
+            _moving = (MovingAverage)tab1.CreateCandleIndicator(_moving, "Prime");
+            _moving.Save();
 
 
 
             tab0.CandleFinishedEvent += Tab0_CandleFinishedEvent;
             tab0.PositionOpeningSuccesEvent += Tab0_PositionOpeningSuccesEvent;
+
+            tab1.CandleFinishedEvent += Tab1_CandleFinishedEvent;
+
+        }
+
+        private void Tab1_CandleFinishedEvent(List<Candle> candles)
+        {
+            if (_moving.Lenght >= candles.Count) return;
+
+            decimal lastValue = _moving.Values[_moving.Values.Count - 1];
+
+            decimal val1 = _moving.Values[_moving.Values.Count - 2];
+            decimal val2 = _moving.Values[_moving.Values.Count - 3];
+            decimal val3 = _moving.Values[_moving.Values.Count - 4];
+            decimal val4 = _moving.Values[_moving.Values.Count - 5];
+            decimal val5 = _moving.Values[_moving.Values.Count - 6];
+
+            if (lastValue > val1 && lastValue > val2 && lastValue > val3 )
+            {
+                isLongTrend = true;
+            }
+            else
+            {
+                isLongTrend = false;
+            }
+
+            if (lastValue < val1 && lastValue < val2 && lastValue < val3)
+            {
+                isShortTrend = true;
+            }
+            else
+            {
+                isShortTrend = false;
+            }
+
+
+
 
         }
 
@@ -111,6 +159,7 @@ namespace OsEngine.Robots.aDev
         private void Tab0_CandleFinishedEvent(List<Candle> candles)
         {
 
+
             //parametres
             var slack = 1;
 
@@ -124,6 +173,11 @@ namespace OsEngine.Robots.aDev
 
 
             if (candles.Count < 10) return;
+
+
+
+
+            //ОСНОВНАЯ ЛОГИКА
 
 
             var candle1 = candles[candles.Count - 2];
@@ -186,8 +240,9 @@ namespace OsEngine.Robots.aDev
             }
 
 
-            if (touch == 2  && prokol <= 0 && error == 0 && tvh == 1)
+            if (touch == 2  && prokol <= 0 && error == 0 && tvh == 1 && isLongTrend)
             {
+
 
                 var slack_order = 4;
                 
@@ -250,7 +305,7 @@ namespace OsEngine.Robots.aDev
             }
 
 
-            if (touch == 2 && prokol <= 0 && error == 0 && tvh == 1)
+            if (touch == 2 && prokol <= 0 && error == 0 && tvh == 1 && isShortTrend)
             {
 
                 var slack_order = 4;
