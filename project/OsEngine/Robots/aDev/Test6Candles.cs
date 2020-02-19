@@ -10,6 +10,10 @@ using OsEngine.OsTrader.Panels.Tab;
 
 namespace OsEngine.Robots.aDev
 {
+
+    //Промежуточные результаты: ПФ = 3.6. Сделок 42 за год.
+    //Параметры: Сбер 5 мин. Сопровождение открытия позы отключено
+
     class Test6Candles : BotPanel
     {
 
@@ -235,7 +239,7 @@ namespace OsEngine.Robots.aDev
             else error++;
 
             
-            if (touch >= 4 && prokol <= 2 && error == 0)
+            if (touch >= 45 && prokol <= 2 && error == 0)
             {
                 DrawLine(checkPrice, $"line-{Convert.ToString(candle1.TimeStart)}", candle1.TimeStart, candle6.TimeStart, Color.Yellow);
                 tab0.SellAtLimit(1, checkPrice - slack);
