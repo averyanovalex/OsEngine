@@ -33,20 +33,20 @@ namespace OsEngine.Robots.aDev
         {
 
             TabCreate(BotTabType.Simple);
-            TabCreate(BotTabType.Simple);
+            //TabCreate(BotTabType.Simple);
             tab0 = TabsSimple[0];
-            tab1 = TabsSimple[1];
+            //tab1 = TabsSimple[1];
 
-            _moving = new MovingAverage("moving1", false);
-            _moving = (MovingAverage)tab1.CreateCandleIndicator(_moving, "Prime");
-            _moving.Save();
+            //_moving = new MovingAverage("moving1", false);
+            //_moving = (MovingAverage)tab1.CreateCandleIndicator(_moving, "Prime");
+            //_moving.Save();
 
 
 
             tab0.CandleFinishedEvent += Tab0_CandleFinishedEvent;
             tab0.PositionOpeningSuccesEvent += Tab0_PositionOpeningSuccesEvent;
 
-            tab1.CandleFinishedEvent += Tab1_CandleFinishedEvent;
+            //tab1.CandleFinishedEvent += Tab1_CandleFinishedEvent;
 
         }
 
@@ -240,7 +240,7 @@ namespace OsEngine.Robots.aDev
             }
 
 
-            if (touch == 2  && prokol <= 0 && error == 0 && tvh == 1 && isLongTrend)
+            if (touch == 2  && prokol <= 0 && error == 0 && tvh == 1 )
             {
 
 
