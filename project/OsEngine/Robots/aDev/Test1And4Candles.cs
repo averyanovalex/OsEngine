@@ -13,7 +13,7 @@ using OsEngine.OsTrader.Panels.Tab;
 namespace OsEngine.Robots.aDev
 
     //Гипотезы:
-    //1.Доработать управление позицией
+    //1.Сопровождение прибыльных позиций
     //2.Потестить на Ри, Си, крипте
     //3.Вылизать алгоритм, добавить рабочие ограничения, оптимизировать
 {
@@ -161,7 +161,7 @@ namespace OsEngine.Robots.aDev
 
 
             //parametres
-            var slack = 1;
+            var slack = 3;
 
 
             List<Position> positions = tab0.PositionsOpenAll;
@@ -231,7 +231,9 @@ namespace OsEngine.Robots.aDev
             Candle tvhCandle = null;
             for (int i = candles.Count-5; i>= indexStart; i--)
             {
-                if (candles[i].Low == low1 || candles[i].High == low1)
+                var deltaLow = Math.Abs(candles[i].Low - low1);
+                var deltaHigh = Math.Abs(candles[i].High - low1);
+                if (deltaLow <= slack || deltaHigh <= slack)
                 {
                     tvh = 1;
                     tvhCandle = candles[i];
