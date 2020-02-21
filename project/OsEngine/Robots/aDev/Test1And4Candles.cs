@@ -13,8 +13,8 @@ using OsEngine.OsTrader.Panels.Tab;
 namespace OsEngine.Robots.aDev
 
     //Гипотезы:
-    //1.Сопровождение прибыльных позиций
-    //2.Потестить на Ри, Си, крипте
+    //1.Потестить на Ри, Си, крипте
+    //2.Дообавить ограничения на первые и последние часы и др.
     //3.Вылизать алгоритм, добавить рабочие ограничения, оптимизировать
 {
     class Test1And4Candles : BotPanel
@@ -46,8 +46,17 @@ namespace OsEngine.Robots.aDev
             tab0.CandleFinishedEvent += Tab0_CandleFinishedEvent;
             tab0.PositionOpeningSuccesEvent += Tab0_PositionOpeningSuccesEvent;
 
+           
+
             //tab1.CandleFinishedEvent += Tab1_CandleFinishedEvent;
 
+        }
+
+
+
+        private void Tab0_OrderUpdateEvent(Order order)
+        {
+            var order2 = order;
         }
 
         private void Tab1_CandleFinishedEvent(List<Candle> candles)
@@ -88,7 +97,7 @@ namespace OsEngine.Robots.aDev
         private void Tab0_PositionOpeningSuccesEvent(Position position)
         {
             int stop = 10;
-            int take = 50;
+            int take = 30;
 
             if (position.Direction == Side.Buy)
             {
@@ -97,16 +106,20 @@ namespace OsEngine.Robots.aDev
 
                 tab0.CloseAtStop(position, stopPrice, stopPrice);
                 tab0.CloseAtProfit(position, takePrice, takePrice);
+                
+                //tab0.CloseAtTrailingStop(position, takePrice, position.EntryPrice + stop);
+
+
 
             }
-            else if (position.Direction == Side.Sell)
-            {
-                decimal stopPrice = position.EntryPrice + tab0.Securiti.PriceStep * stop;
-                decimal takePrice = position.EntryPrice - tab0.Securiti.PriceStep * take;
-
-                tab0.CloseAtStop(position, stopPrice, stopPrice);
-                tab0.CloseAtProfit(position, takePrice, takePrice);
-            }
+            //else if (position.Direction == Side.Sell)
+            //{
+            //    decimal stopPrice = position.EntryPrice + tab0.Securiti.PriceStep * stop;
+            //    decimal takePrice = position.EntryPrice - tab0.Securiti.PriceStep * take;
+            //
+            //    tab0.CloseAtStop(position, stopPrice, stopPrice);
+            //    tab0.CloseAtProfit(position, takePrice, takePrice);
+            //}
         }
 
         private void DrawLine(decimal value, string name, DateTime timeStart, DateTime timeEnd, Color color)
@@ -146,12 +159,13 @@ namespace OsEngine.Robots.aDev
             return min;
         }
 
-        private decimal maxVal(decimal val1, decimal val2)
+        private decimal maxVal(decimal val1, decimal val2, decimal val3)
         {
             var max = val1;
             if (val2 > max) max = val2;
-            
-           
+            if (val3 > max) max = val3;
+
+
 
             return max;
         }
@@ -167,7 +181,19 @@ namespace OsEngine.Robots.aDev
             List<Position> positions = tab0.PositionsOpenAll;
             if (positions != null && positions.Count != 0)
             {
-                
+
+                var position = positions[0];
+                if (position.State != PositionStateType.Open) return;
+
+
+                var lastCandle = candles[candles.Count - 1];
+
+                if (lastCandle.Close > position.StopOrderPrice + 40)
+                {
+                    //tab0.CloseAtTrailingStop(position, lastCandle.Close - 20, lastCandle.Close - 20);
+                }
+
+
                 return;
             }
 
@@ -182,29 +208,27 @@ namespace OsEngine.Robots.aDev
 
             var candle1 = candles[candles.Count - 2];
             var candle2 = candles[candles.Count - 1];
-            
-            
+
 
 
             //проверяем на Low
             var low1 = candle1.Low;
             var low2 = candle2.Low;
-            
-            
+
 
 
             var body1 = Math.Min(candle1.Close, candle1.Open);
             var body2 = Math.Min(candle2.Close, candle2.Open);
-            
-            
 
 
-            var checkPrice = maxVal(low1, low2);
+
+
+            var checkPrice = maxVal(low1, low2, 0);
 
             var delta1 = Math.Abs(low1 - checkPrice);
             var delta2 = Math.Abs(low2 - checkPrice);
-            
-            
+
+
 
 
             var touch = 0;
@@ -221,7 +245,9 @@ namespace OsEngine.Robots.aDev
             else error++;
 
 
-            
+
+
+
 
             //Ищем ТВХ
             var indexStart = candles.Count - 54;
@@ -242,14 +268,15 @@ namespace OsEngine.Robots.aDev
             }
 
 
-            if (touch == 2  && prokol <= 0 && error == 0 && tvh == 1 )
+            //if (touch == 2  && prokol <= 0 && error == 0 && tvh == 1 )
+            if (touch == 2 && prokol <= 0 && error == 0 )
             {
 
 
                 var slack_order = 4;
                 
-                DrawLine(checkPrice, $"line-{Convert.ToString(candle1.TimeStart)}", candle1.TimeStart, candle2.TimeStart, Color.Blue);
-                DrawPoint(tvhCandle.Low - 20, $"point-{Convert.ToString(tvhCandle.TimeStart)}", tvhCandle.TimeStart, Color.Yellow);
+                //DrawLine(checkPrice, $"line-{Convert.ToString(candle1.TimeStart)}", candle1.TimeStart, candle2.TimeStart, Color.Blue);
+                //DrawPoint(tvhCandle.Low - 20, $"point-{Convert.ToString(tvhCandle.TimeStart)}", tvhCandle.TimeStart, Color.Yellow);
                 tab0.BuyAtLimit(1, checkPrice + slack_order);
                 return;
             }
