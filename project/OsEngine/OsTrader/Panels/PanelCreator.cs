@@ -40,7 +40,7 @@ namespace OsEngine.OsTrader.Panels
             result.Add("Test1");
             result.Add("Test2"); 
             result.Add("Test6Candles");
-            result.Add("Test1And4Candles");
+            result.Add("MaxBot");
 
             //аDemo: Мои учебные роботы
             //result.Add("DemoHammer");
@@ -105,9 +105,9 @@ namespace OsEngine.OsTrader.Panels
             {
                 bot = new Test6Candles(name, startProgram);
             }
-            if (nameClass == "Test1And4Candles")
+            if (nameClass == "MaxBot")
             {
-                bot = new Test1And4Candles(name, startProgram);
+                bot = new MaxBot(name, startProgram);
             }
 
 

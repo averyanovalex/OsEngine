@@ -1,0 +1,202 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Windows.Forms.DataVisualization.Charting;
+using OsEngine.Charts.CandleChart.Elements;
+using OsEngine.Charts.CandleChart.Indicators;
+using OsEngine.Entity;
+using OsEngine.Market;
+using OsEngine.OsTrader.Panels;
+using OsEngine.OsTrader.Panels.Tab;
+
+namespace OsEngine.Robots.aDev
+
+
+    //TODO:
+    //1.Переписать алгоритм.
+    //2.Рефакторить структуру модулей
+    //3.Дообавить ограничения на первые и последние часы и выходные дни
+    //4.Удалить лишний код из текущей ветки
+    //5.Слить ветку и обновить последние обновления
+    //6.Оптимизировать, подобрать лучшие параметры
+
+
+    //Описание:
+    //Ловля краткосрочных импульсов, отскоков от локального уровня. Если 2 или больше свечей оттолкнулись от одного уровня,
+    //входим. Стопы и тейки фиксированные
+{
+    class MaxBot : BotPanel
+    {
+
+        private BotTabSimple tab0;
+
+        public int stop = 10; //стоп в пунктах
+        public int take = 30; //тейк в пунктах
+        public int slack = 3; //люфт в пунктах
+        public int candlesCount = 2; //количество проверяемых свечей
+
+        public MaxBot(string name, StartProgram startProgram) : base(name, startProgram)
+        {
+
+            TabCreate(BotTabType.Simple);
+            tab0 = TabsSimple[0];
+
+            tab0.CandleFinishedEvent += Tab0_CandleFinishedEvent;
+            tab0.PositionOpeningSuccesEvent += Tab0_PositionOpeningSuccesEvent;
+
+        }
+
+        private void Tab0_PositionOpeningSuccesEvent(Position position)
+        {
+
+            int koef = 0;
+            if (position.Direction == Side.Buy) koef = 1;
+            else if (position.Direction == Side.Sell) koef = -1;
+            else
+            {
+                tab0.CloseAtMarket(position, position.OpenVolume);
+                throw new InvalidOperationException("Неверный тип позиции. Позиция должна быть Buy или Sell");
+            }
+
+
+            decimal stopPrice = position.EntryPrice - koef * tab0.Securiti.PriceStep * stop;
+            decimal takePrice = position.EntryPrice + koef * tab0.Securiti.PriceStep * take;
+
+            tab0.CloseAtStop(position, stopPrice, stopPrice);
+            tab0.CloseAtProfit(position, takePrice, takePrice);
+
+        }
+
+        private void Tab0_CandleFinishedEvent(List<Candle> candles)
+        {
+
+            List<Position> positions = tab0.PositionsOpenAll;
+            if (positions != null && positions.Count != 0) return;
+
+            if (candles.Count < candlesCount + 1) return;
+
+
+
+            List<Candle> checkingCandles = new List<Candle>();
+            for (int i = candles.Count - candlesCount; i <= candles.Count - 1; i++)
+            {
+                checkingCandles.Add(candles[i]);
+            }
+
+            var candle1 = candles[candles.Count - 2];
+            var candle2 = candles[candles.Count - 1];
+
+
+
+            //проверяем на Low
+            var low1 = candle1.Low;
+            var low2 = candle2.Low;
+
+
+
+            var body1 = Math.Min(candle1.Close, candle1.Open);
+            var body2 = Math.Min(candle2.Close, candle2.Open);
+
+
+
+
+            var checkPrice = maxVal(low1, low2, 0);
+
+            var delta1 = Math.Abs(low1 - checkPrice);
+            var delta2 = Math.Abs(low2 - checkPrice);
+
+
+
+
+            var touch = 0;
+            var prokol = 0;
+            var error = 0;
+
+
+            if (delta1 <= slack && body1 > checkPrice) touch++;
+            else if (body1 > checkPrice && low1 < checkPrice) prokol++;
+            else error++;
+
+            if (delta2 <= slack && body2 > checkPrice) touch++;
+            else if (body2 > checkPrice && low2 < checkPrice) prokol++;
+            else error++;
+
+
+
+
+            if (touch == 2 && prokol <= 0 && error == 0)
+            {
+
+
+                var slack_order = 4;
+
+                //DrawLine(checkPrice, $"line-{Convert.ToString(candle1.TimeStart)}", candle1.TimeStart, candle2.TimeStart, Color.Blue);
+                //DrawPoint(tvhCandle.Low - 20, $"point-{Convert.ToString(tvhCandle.TimeStart)}", tvhCandle.TimeStart, Color.Yellow);
+                tab0.BuyAtLimit(1, checkPrice + slack_order);
+                return;
+            }
+
+  
+        }
+
+
+        private void DrawLine(decimal value, string name, DateTime timeStart, DateTime timeEnd, Color color)
+        {
+
+            var lineOnChart = new LineHorisontal(name, "Prime", false)
+            {
+                Color = color,
+                Value = value,
+                TimeStart = timeStart,
+                TimeEnd = timeEnd
+            };
+            tab0.SetChartElement(lineOnChart);
+        }
+
+        private void DrawPoint(decimal value, string name, DateTime time, Color color)
+        {
+
+            var pointOnChart = new PointElement(name, "Prime")
+            {
+                Color = color,
+                Size = 10,
+                Style = MarkerStyle.Star6,
+                TimePoint = time,
+                Y = value
+            };
+
+            tab0.SetChartElement(pointOnChart);
+        }
+
+        private decimal minVal(decimal val1, decimal val2)
+        {
+            var min = val1;
+            if (val2 < min) min = val2;
+  
+
+            return min;
+        }
+
+        private decimal maxVal(decimal val1, decimal val2, decimal val3)
+        {
+            var max = val1;
+            if (val2 > max) max = val2;
+            if (val3 > max) max = val3;
+
+
+
+            return max;
+        }
+
+        public override string GetNameStrategyType()
+        {
+            return "MaxBot";
+        }
+
+
+        public override void ShowIndividualSettingsDialog()
+        {
+
+        }
+    }
+}
