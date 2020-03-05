@@ -14,6 +14,8 @@ namespace OsEngine.Robots.aDev
 
     //TODO:
     //1.Переписать алгоритм.
+    //1.1 Сделать шорт
+    //1.2 Вынести параметры
     //2.Рефакторить структуру модулей
     //3.Дообавить ограничения на первые и последние часы и выходные дни
     //4.Удалить лишний код из текущей ветки
@@ -33,6 +35,7 @@ namespace OsEngine.Robots.aDev
         public int stop = 10; //стоп в пунктах
         public int take = 30; //тейк в пунктах
         public int slack = 3; //люфт в пунктах
+        public int slack_order = 4; //люфт для выставления ордера в пунктах
         public int candlesCount = 2; //количество проверяемых свечей
 
         public MaxBot(string name, StartProgram startProgram) : base(name, startProgram)
@@ -73,9 +76,14 @@ namespace OsEngine.Robots.aDev
             List<Position> positions = tab0.PositionsOpenAll;
             if (positions != null && positions.Count != 0) return;
 
+            TradeLogic(candles);
+  
+        }
+
+        private void TradeLogic(List<Candle> candles)
+        {
+
             if (candles.Count < candlesCount + 1) return;
-
-
 
             List<Candle> checkingCandles = new List<Candle>();
             for (int i = candles.Count - candlesCount; i <= candles.Count - 1; i++)
@@ -83,116 +91,52 @@ namespace OsEngine.Robots.aDev
                 checkingCandles.Add(candles[i]);
             }
 
-            var candle1 = candles[candles.Count - 2];
-            var candle2 = candles[candles.Count - 1];
 
+            //ищем точку входа в Лонг
 
+            decimal checkPrice = calcMaxLowPrice(checkingCandles);
 
-            //проверяем на Low
-            var low1 = candle1.Low;
-            var low2 = candle2.Low;
+            List<decimal> body = new List<decimal>();
+            List<decimal> delta = new List<decimal>();
 
-
-
-            var body1 = Math.Min(candle1.Close, candle1.Open);
-            var body2 = Math.Min(candle2.Close, candle2.Open);
-
-
-
-
-            var checkPrice = maxVal(low1, low2, 0);
-
-            var delta1 = Math.Abs(low1 - checkPrice);
-            var delta2 = Math.Abs(low2 - checkPrice);
-
-
-
-
-            var touch = 0;
-            var prokol = 0;
-            var error = 0;
-
-
-            if (delta1 <= slack && body1 > checkPrice) touch++;
-            else if (body1 > checkPrice && low1 < checkPrice) prokol++;
-            else error++;
-
-            if (delta2 <= slack && body2 > checkPrice) touch++;
-            else if (body2 > checkPrice && low2 < checkPrice) prokol++;
-            else error++;
-
-
-
-
-            if (touch == 2 && prokol <= 0 && error == 0)
+            for (int i = 0; i < checkingCandles.Count; i++)
             {
+                body.Add(Math.Min(checkingCandles[i].Close, checkingCandles[i].Open));
+                delta.Add(Math.Abs(checkingCandles[i].Low - checkPrice));
+            }
 
 
-                var slack_order = 4;
+            int touch = 0;
 
-                //DrawLine(checkPrice, $"line-{Convert.ToString(candle1.TimeStart)}", candle1.TimeStart, candle2.TimeStart, Color.Blue);
-                //DrawPoint(tvhCandle.Low - 20, $"point-{Convert.ToString(tvhCandle.TimeStart)}", tvhCandle.TimeStart, Color.Yellow);
-                tab0.BuyAtLimit(1, checkPrice + slack_order);
+            for (int i = 0; i < checkingCandles.Count; i++)
+            {
+                if (delta[i] <= slack && body[i] > checkPrice) touch++;
+            }
+
+
+            if (touch == candlesCount)
+            {
+                tab0.BuyAtLimit(1, checkPrice + slack_order * tab0.Securiti.PriceStep);
                 return;
             }
 
-  
+
         }
-
-
-        private void DrawLine(decimal value, string name, DateTime timeStart, DateTime timeEnd, Color color)
+        private decimal calcMaxLowPrice(List<Candle> candles)
         {
-
-            var lineOnChart = new LineHorisontal(name, "Prime", false)
+            decimal result = 0;
+            foreach (Candle candle in candles)
             {
-                Color = color,
-                Value = value,
-                TimeStart = timeStart,
-                TimeEnd = timeEnd
-            };
-            tab0.SetChartElement(lineOnChart);
-        }
+                result = candle.Low > result ? candle.Low : result;
+            }
 
-        private void DrawPoint(decimal value, string name, DateTime time, Color color)
-        {
-
-            var pointOnChart = new PointElement(name, "Prime")
-            {
-                Color = color,
-                Size = 10,
-                Style = MarkerStyle.Star6,
-                TimePoint = time,
-                Y = value
-            };
-
-            tab0.SetChartElement(pointOnChart);
-        }
-
-        private decimal minVal(decimal val1, decimal val2)
-        {
-            var min = val1;
-            if (val2 < min) min = val2;
-  
-
-            return min;
-        }
-
-        private decimal maxVal(decimal val1, decimal val2, decimal val3)
-        {
-            var max = val1;
-            if (val2 > max) max = val2;
-            if (val3 > max) max = val3;
-
-
-
-            return max;
+            return result;
         }
 
         public override string GetNameStrategyType()
         {
             return "MaxBot";
         }
-
 
         public override void ShowIndividualSettingsDialog()
         {
