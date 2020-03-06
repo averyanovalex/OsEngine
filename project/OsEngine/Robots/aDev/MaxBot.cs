@@ -14,7 +14,6 @@ namespace OsEngine.Robots.aDev
 
     //TODO:
     //1.Переписать алгоритм.
-    //1.1 Сделать шорт
     //1.2 Вынести параметры
     //2.Рефакторить структуру модулей
     //3.Дообавить ограничения на первые и последние часы и выходные дни
@@ -27,6 +26,14 @@ namespace OsEngine.Robots.aDev
     //Ловля краткосрочных импульсов, отскоков от локального уровня. Если 2 или больше свечей оттолкнулись от одного уровня,
     //входим. Стопы и тейки фиксированные
 {
+    enum Mode
+    {
+        On_Long_Short,
+        On_OnlyLong,
+        On_OnlyShort,
+        Off,
+    }
+    
     class MaxBot : BotPanel
     {
 
@@ -37,6 +44,7 @@ namespace OsEngine.Robots.aDev
         public int slack = 3; //люфт в пунктах
         public int slack_order = 4; //люфт для выставления ордера в пунктах
         public int candlesCount = 2; //количество проверяемых свечей
+        public Mode mode = Mode.On_OnlyLong;
 
         public MaxBot(string name, StartProgram startProgram) : base(name, startProgram)
         {
@@ -73,6 +81,8 @@ namespace OsEngine.Robots.aDev
         private void Tab0_CandleFinishedEvent(List<Candle> candles)
         {
 
+            if (mode == Mode.Off) return;
+            
             List<Position> positions = tab0.PositionsOpenAll;
             if (positions != null && positions.Count != 0) return;
 
@@ -93,41 +103,89 @@ namespace OsEngine.Robots.aDev
 
 
             //ищем точку входа в Лонг
-
-            decimal checkPrice = calcMaxLowPrice(checkingCandles);
-
-            List<decimal> body = new List<decimal>();
-            List<decimal> delta = new List<decimal>();
-
-            for (int i = 0; i < checkingCandles.Count; i++)
+            if (mode == Mode.On_Long_Short || mode == Mode.On_OnlyLong)
             {
-                body.Add(Math.Min(checkingCandles[i].Close, checkingCandles[i].Open));
-                delta.Add(Math.Abs(checkingCandles[i].Low - checkPrice));
+
+                decimal checkPrice = calcMaxLowPrice(checkingCandles);
+
+                List<decimal> body = new List<decimal>();
+                List<decimal> delta = new List<decimal>();
+
+                for (int i = 0; i < checkingCandles.Count; i++)
+                {
+                    body.Add(Math.Min(checkingCandles[i].Close, checkingCandles[i].Open));
+                    delta.Add(Math.Abs(checkingCandles[i].Low - checkPrice));
+                }
+
+
+                int touch = 0;
+
+                for (int i = 0; i < checkingCandles.Count; i++)
+                {
+                    if (delta[i] <= slack && body[i] >= checkPrice) touch++;
+                }
+
+                if (touch == candlesCount)
+                {
+                    tab0.BuyAtLimit(1, checkPrice + slack_order * tab0.Securiti.PriceStep);
+                    return;
+                }
+
             }
 
 
-            int touch = 0;
 
-            for (int i = 0; i < checkingCandles.Count; i++)
+            //ищем точку входа в Шорт
+            if (mode == Mode.On_Long_Short || mode == Mode.On_OnlyShort)
             {
-                if (delta[i] <= slack && body[i] > checkPrice) touch++;
-            }
+
+                decimal checkPrice = calcMinHighPrice(checkingCandles);
+
+                List<decimal> body = new List<decimal>();
+                List<decimal> delta = new List<decimal>();
+
+                for (int i = 0; i < checkingCandles.Count; i++)
+                {
+                    body.Add(Math.Max(checkingCandles[i].Close, checkingCandles[i].Open));
+                    delta.Add(Math.Abs(checkingCandles[i].High - checkPrice));
+                }
 
 
-            if (touch == candlesCount)
-            {
-                tab0.BuyAtLimit(1, checkPrice + slack_order * tab0.Securiti.PriceStep);
-                return;
+                int touch = 0;
+
+                for (int i = 0; i < checkingCandles.Count; i++)
+                {
+                    if (delta[i] <= slack && body[i] <= checkPrice) touch++;
+                }
+
+                if (touch == candlesCount)
+                {
+                    tab0.SellAtLimit(1, checkPrice - slack_order * tab0.Securiti.PriceStep);
+                    return;
+                }
+
             }
 
 
         }
+
         private decimal calcMaxLowPrice(List<Candle> candles)
         {
             decimal result = 0;
             foreach (Candle candle in candles)
             {
                 result = candle.Low > result ? candle.Low : result;
+            }
+
+            return result;
+        }
+
+        private decimal calcMinHighPrice(List<Candle> candles)
+        {
+            decimal result = candles[0].High;
+            foreach (Candle candle in candles)
+            {
+                result = candle.High < result ? candle.High : result;
             }
 
             return result;
