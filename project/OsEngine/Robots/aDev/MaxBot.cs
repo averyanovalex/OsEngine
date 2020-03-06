@@ -8,30 +8,23 @@ using OsEngine.Entity;
 using OsEngine.Market;
 using OsEngine.OsTrader.Panels;
 using OsEngine.OsTrader.Panels.Tab;
+using OsEngine.Robots.aLibs;
 
 namespace OsEngine.Robots.aDev
 
 
     //TODO:
     //2.Рефакторить структуру модулей
-    //3.Дообавить ограничения на первые и последние часы и выходные дни
-    //4.Удалить лишний код из текущей ветки
-    //5.Придумать версионирование
-    //6.Слить ветку и обновить последние обновления
-    //7.Оптимизировать, подобрать лучшие параметры
+    //3.Удалить лишний код из текущей ветки
+    //4.Придумать версионирование
+    //5.Слить ветку и обновить последние обновления
+    //6.Оптимизировать, подобрать лучшие параметры
 
 
     //Описание:
     //Ловля краткосрочных импульсов, отскоков от локального уровня. Если 2 или больше свечей оттолкнулись от одного уровня,
     //входим. Стопы и тейки фиксированные
 {
-    enum Mode
-    {
-        On_Long_Short,
-        On_OnlyLong,
-        On_OnlyShort,
-        Off,
-    }
     
     class MaxBot : BotPanel
     {
@@ -39,7 +32,8 @@ namespace OsEngine.Robots.aDev
         private BotTabSimple tab0;
 
         
-        private StrategyParameterString param_mode;
+        private StrategyParameterString param_mode; // включен, выключен, шорт или лонг
+        private StrategyParameterString param_working_mode;  // торговые часы
         private StrategyParameterInt param_stop; //стоп в пунктах
         private StrategyParameterInt param_take; //тейк в пунктах
         private StrategyParameterInt param_slack; //люфт в пунктах
@@ -53,6 +47,7 @@ namespace OsEngine.Robots.aDev
             tab0 = TabsSimple[0];
 
             param_mode = CreateParameter("Mode", "Off", new[] { "Off", "On_Long_Short", "On_OnlyLong", "On_OnlyShort"});
+            param_working_mode = CreateParameter("Working_Mode", "DayAndNight", new[] { "DayAndNight", "MoscowExchange_Stocks", "MoscowExchange_Forts" });
             param_stop = CreateParameter("Stop", 10, 0, 100, 1);
             param_take = CreateParameter("Take", 30, 0, 300, 1);
             param_slack = CreateParameter("Slack", 3, 0, 10, 1);
@@ -92,9 +87,47 @@ namespace OsEngine.Robots.aDev
         {
 
             if (param_mode.ValueString == "Off") return;
+
+
+            var workingMode = WorkingModeType.DayAndNight;
+            if (param_working_mode.ValueString == "DayAndNight") 
+            {
+                //уже установили
+            }
+            else if (param_working_mode.ValueString == "MoscowExchange_Forts")
+            {
+                workingMode = WorkingModeType.MoscowExchange_Forts;
+            }
+            else if (param_working_mode.ValueString == "MoscowExchange_Stocks")
+            {
+                workingMode = WorkingModeType.MoscowExchange_Stocks;
+            }
+            else
+            {
+                throw new InvalidOperationException("ОШИБКА: Неизвестный тип рабочего режима!");
+            }
+
             
             List<Position> positions = tab0.PositionsOpenAll;
-            if (positions != null && positions.Count != 0) return;
+
+            if (!CommonFuns.isWorkingTimeNow(candles[candles.Count-1].TimeStart, workingMode))
+            {
+                if (positions != null && positions.Count != 0 && positions[0].State == PositionStateType.Open)
+                {
+                    //не рабочие часы, есть открытая поза. закрываем ее и выходим
+                    tab0.CloseAllAtMarket();
+                }
+                else
+                { //нерабочие часы, позы нет, выходим
+                    return;
+                }
+            } 
+            else
+            { //рабочие часы, есть открытая поза, ничего не делаем
+                if (positions != null && positions.Count != 0) return;
+            }
+                
+
 
             TradeLogic(candles);
   
@@ -136,7 +169,7 @@ namespace OsEngine.Robots.aDev
 
                 for (int i = 0; i < checkingCandles.Count; i++)
                 {
-                    if (delta[i] <= slack && body[i] >= checkPrice) touch++;
+                    if (delta[i] <= slack * tab0.Securiti.PriceStep  && body[i] >= checkPrice) touch++;
                 }
 
                 if (touch == candlesCount)
