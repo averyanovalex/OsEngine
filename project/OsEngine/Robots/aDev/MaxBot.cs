@@ -13,13 +13,12 @@ namespace OsEngine.Robots.aDev
 
 
     //TODO:
-    //1.Переписать алгоритм.
-    //1.2 Вынести параметры
     //2.Рефакторить структуру модулей
     //3.Дообавить ограничения на первые и последние часы и выходные дни
     //4.Удалить лишний код из текущей ветки
-    //5.Слить ветку и обновить последние обновления
-    //6.Оптимизировать, подобрать лучшие параметры
+    //5.Придумать версионирование
+    //6.Слить ветку и обновить последние обновления
+    //7.Оптимизировать, подобрать лучшие параметры
 
 
     //Описание:
@@ -39,18 +38,26 @@ namespace OsEngine.Robots.aDev
 
         private BotTabSimple tab0;
 
-        public int stop = 10; //стоп в пунктах
-        public int take = 30; //тейк в пунктах
-        public int slack = 3; //люфт в пунктах
-        public int slack_order = 4; //люфт для выставления ордера в пунктах
-        public int candlesCount = 2; //количество проверяемых свечей
-        public Mode mode = Mode.On_OnlyLong;
+        
+        private StrategyParameterString param_mode;
+        private StrategyParameterInt param_stop; //стоп в пунктах
+        private StrategyParameterInt param_take; //тейк в пунктах
+        private StrategyParameterInt param_slack; //люфт в пунктах
+        private StrategyParameterInt param_slack_order; //люфт для выставления ордера в пунктах
+        private StrategyParameterInt param_candlesCount; //количество проверяемых свечей
 
         public MaxBot(string name, StartProgram startProgram) : base(name, startProgram)
         {
 
             TabCreate(BotTabType.Simple);
             tab0 = TabsSimple[0];
+
+            param_mode = CreateParameter("Mode", "Off", new[] { "Off", "On_Long_Short", "On_OnlyLong", "On_OnlyShort"});
+            param_stop = CreateParameter("Stop", 10, 0, 100, 1);
+            param_take = CreateParameter("Take", 30, 0, 300, 1);
+            param_slack = CreateParameter("Slack", 3, 0, 10, 1);
+            param_slack_order = CreateParameter("Slack_order", 4, 0, 10, 1);
+            param_candlesCount = CreateParameter("CandlesCount", 2, 2, 5, 1);
 
             tab0.CandleFinishedEvent += Tab0_CandleFinishedEvent;
             tab0.PositionOpeningSuccesEvent += Tab0_PositionOpeningSuccesEvent;
@@ -60,6 +67,9 @@ namespace OsEngine.Robots.aDev
         private void Tab0_PositionOpeningSuccesEvent(Position position)
         {
 
+            int stop = param_stop.ValueInt;
+            int take = param_take.ValueInt;
+            
             int koef = 0;
             if (position.Direction == Side.Buy) koef = 1;
             else if (position.Direction == Side.Sell) koef = -1;
@@ -81,7 +91,7 @@ namespace OsEngine.Robots.aDev
         private void Tab0_CandleFinishedEvent(List<Candle> candles)
         {
 
-            if (mode == Mode.Off) return;
+            if (param_mode.ValueString == "Off") return;
             
             List<Position> positions = tab0.PositionsOpenAll;
             if (positions != null && positions.Count != 0) return;
@@ -93,6 +103,10 @@ namespace OsEngine.Robots.aDev
         private void TradeLogic(List<Candle> candles)
         {
 
+            int slack = param_slack.ValueInt;
+            int slack_order = param_slack_order.ValueInt;
+            int candlesCount = param_candlesCount.ValueInt;
+            
             if (candles.Count < candlesCount + 1) return;
 
             List<Candle> checkingCandles = new List<Candle>();
@@ -103,7 +117,7 @@ namespace OsEngine.Robots.aDev
 
 
             //ищем точку входа в Лонг
-            if (mode == Mode.On_Long_Short || mode == Mode.On_OnlyLong)
+            if (param_mode.ValueString == "On_Long_Short" || param_mode.ValueString == "On_OnlyLong")
             {
 
                 decimal checkPrice = calcMaxLowPrice(checkingCandles);
@@ -136,7 +150,7 @@ namespace OsEngine.Robots.aDev
 
 
             //ищем точку входа в Шорт
-            if (mode == Mode.On_Long_Short || mode == Mode.On_OnlyShort)
+            if (param_mode.ValueString == "On_Long_Short" || param_mode.ValueString == "On_OnlyShort")
             {
 
                 decimal checkPrice = calcMinHighPrice(checkingCandles);
