@@ -12,6 +12,10 @@ using System.Windows.Forms.DataVisualization.Charting;
 
 namespace OsEngine.Robots.aDev
 {
+
+    //Описание:
+    //Пример использования точек и линий на графике
+
     class Test1 : BotPanel
     {
 

@@ -20,6 +20,7 @@ using MessageBox = System.Windows.MessageBox;
 
 using OsEngine.Robots.aDemo; //учебные роботы
 using OsEngine.Robots.aDev; //роботы в разработке
+using OsEngine.Robots.aProd; //роботы в в продакшене
 
 
 namespace OsEngine.OsTrader.Panels
@@ -36,9 +37,10 @@ namespace OsEngine.OsTrader.Panels
             List<string> result = new List<string>();
 
             //aDev, aProd: Мои боевые роботы
-            result.Add("DevPingBot");
+            result.Add("PingBot");
+            result.Add("MaxBot");
             result.Add("Test1");
-            result.Add("Test2");
+            result.Add("Test6Candles");         
 
             //аDemo: Мои учебные роботы
             //result.Add("DemoHammer");
@@ -87,7 +89,7 @@ namespace OsEngine.OsTrader.Panels
             BotPanel bot = null;
 
             //aDev, aProd: Мои боевые роботы
-            if (nameClass == "DevPingBot")
+            if (nameClass == "PingBot")
             {
                 bot = new PingBot(name, startProgram);
             }
@@ -95,11 +97,14 @@ namespace OsEngine.OsTrader.Panels
             {
                 bot = new Test1(name, startProgram);
             }
-            if (nameClass == "Test2")
+            if (nameClass == "Test6Candles")
             {
-                bot = new Test2(name, startProgram);
+                bot = new Test6Candles(name, startProgram);
             }
-
+            if (nameClass == "MaxBot")
+            {
+                bot = new MaxBot(name, startProgram);
+            }
 
 
             //аDemo: Мои учебные роботы

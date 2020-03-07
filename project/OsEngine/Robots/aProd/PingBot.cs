@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using OsEngine.Robots.aLibs;
 using System.IO;
 
-namespace OsEngine.Robots.aDev
+namespace OsEngine.Robots.aProd
 {
 
     //<description>
@@ -22,6 +22,9 @@ namespace OsEngine.Robots.aDev
       
     public class PingBot : BotPanel
     {
+
+        public string version = "1.0";
+        
         private BotTabSimple tab0;
 
         public bool isOn;                    //Вкл./Выкл.
@@ -153,7 +156,7 @@ namespace OsEngine.Robots.aDev
 
         public override string GetNameStrategyType()
         {
-            return "DevPingBot";
+            return "PingBot";
         }
 
         public override void ShowIndividualSettingsDialog()
