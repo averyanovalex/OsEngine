@@ -6,7 +6,7 @@ using OsEngine.Language;
 using OsEngine.OsTrader.Panels;
 using OsEngine.Robots.aLibs;
 
-namespace OsEngine.Robots.aDev
+namespace OsEngine.Robots.aProd
 {
     public partial class PingBotUi
     {

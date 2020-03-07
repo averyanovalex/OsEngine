@@ -10,7 +10,7 @@ using OsEngine.OsTrader.Panels;
 using OsEngine.OsTrader.Panels.Tab;
 using OsEngine.Robots.aLibs;
 
-namespace OsEngine.Robots.aDev
+namespace OsEngine.Robots.aProd
 
 
     //TODO:

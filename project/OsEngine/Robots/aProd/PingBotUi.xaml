@@ -1,4 +1,4 @@
-﻿<Window x:Class="OsEngine.Robots.aDev.PingBotUi"
+﻿<Window x:Class="OsEngine.Robots.aProd.PingBotUi"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       Title="Settings" Height="250.953" Width="430.404" Icon="/Images/OsLogo.ico" Style="{StaticResource WindowStyleNoResize}" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Topmost="True">
