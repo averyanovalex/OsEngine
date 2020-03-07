@@ -273,10 +273,14 @@ namespace OsEngine.Entity
                 decimal price;
                 try
                 {
-                    if (_glassBox.CurrentCell == null)
+                    if (_glassBox.CurrentCell == null ||
+                        _glassBox.Rows.Count == 0 ||
+                        _glassBox.Rows[_glassBox.CurrentCell.RowIndex].Cells.Count < 2 ||
+                        _glassBox.Rows[_glassBox.CurrentCell.RowIndex].Cells[2].Value == null)
                     {
                         return;
                     }
+  
                     price = _glassBox.Rows[_glassBox.CurrentCell.RowIndex].Cells[2].Value.ToString().ToDecimal();
                 }
                 catch (Exception)
@@ -455,8 +459,8 @@ namespace OsEngine.Entity
                 {
                     if (i < depth.Bids.Count)
                     {
-                        _glassBox.Rows[25 + i].Cells[2].Value = depth.Bids[i].Price.ToString("G29");
-                        _glassBox.Rows[25 + i].Cells[3].Value = depth.Bids[i].Bid.ToString("G29");
+                        _glassBox.Rows[25 + i].Cells[2].Value = depth.Bids[i].Price.ToStringWithNoEndZero();
+                        _glassBox.Rows[25 + i].Cells[3].Value = depth.Bids[i].Bid.ToStringWithNoEndZero();
                         if (depth.Bids[i].Bid > maxVol)
                         {
                             maxVol = depth.Bids[i].Bid;
@@ -477,8 +481,8 @@ namespace OsEngine.Entity
                 {
                     if (i < depth.Asks.Count)
                     {
-                        _glassBox.Rows[24 - i].Cells[2].Value = depth.Asks[i].Price.ToString("G29");
-                        _glassBox.Rows[24 - i].Cells[3].Value = depth.Asks[i].Ask.ToString("G29");
+                        _glassBox.Rows[24 - i].Cells[2].Value = depth.Asks[i].Price.ToStringWithNoEndZero();
+                        _glassBox.Rows[24 - i].Cells[3].Value = depth.Asks[i].Ask.ToStringWithNoEndZero();
 
                         if (depth.Asks[i].Ask > maxVol)
                         {
@@ -635,8 +639,8 @@ namespace OsEngine.Entity
 
                 if (ask != 0 && bid != 0)
                 {
-                    _glassBox.Rows[25].Cells[2].Value = bid.ToString("G29");
-                    _glassBox.Rows[24].Cells[2].Value = ask.ToString("G29");
+                    _glassBox.Rows[25].Cells[2].Value = bid.ToStringWithNoEndZero();
+                    _glassBox.Rows[24].Cells[2].Value = ask.ToStringWithNoEndZero();
                 }
             }
             catch (Exception error)

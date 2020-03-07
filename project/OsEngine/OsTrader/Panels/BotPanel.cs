@@ -220,7 +220,15 @@ namespace OsEngine.OsTrader.Panels
                 for (int i = 0; _botTabs != null && i < _botTabs.Count; i++)
                 {
                     _botTabs[i].StopPaint();
-                    _log.StopPaint();
+                    try
+                    {
+                        _log.StopPaint();
+                    }
+                    catch
+                    {
+                        // ignore
+                    }
+                   
                 }
 
                 _tabBotTab = null;
@@ -379,7 +387,12 @@ namespace OsEngine.OsTrader.Panels
                     {
                         continue;
                     }
-                    result += PositionStaticticGenerator.GetAllProfitPersent(journals[i].AllPosition.ToArray());
+
+                    List<Position> positions = journals[i].AllPosition.FindAll((
+position => position.State != PositionStateType.OpeningFail
+&& position.EntryPrice != 0 && position.ClosePrice != 0));
+
+                    result += PositionStaticticGenerator.GetAllProfitPersent(positions.ToArray());
                 }
                 return result;
             }
@@ -410,7 +423,12 @@ namespace OsEngine.OsTrader.Panels
                     {
                         continue;
                     }
-                    result += PositionStaticticGenerator.GetMidleProfitInPersent(journals[i].AllPosition.ToArray());
+
+                    List<Position> positions = journals[i].AllPosition.FindAll((
+                    position => position.State != PositionStateType.OpeningFail
+                    && position.EntryPrice != 0 && position.ClosePrice != 0));
+
+                    result += PositionStaticticGenerator.GetMidleProfitInPersent(positions.ToArray());
                 }
                 return result;
             }
