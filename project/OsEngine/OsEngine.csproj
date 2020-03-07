@@ -642,6 +642,25 @@
     <Compile Include="OsTrader\Panels\PanelsGui\BollingerOutburstUi.xaml.cs">
       <DependentUpon>BollingerOutburstUi.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Robots\aDemo\DemoBullishEngulfing.cs" />
+    <Compile Include="Robots\aDemo\DemoBullishEngulfingUi.xaml.cs">
+      <DependentUpon>DemoBullishEngulfingUi.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Robots\aDemo\DemoHammer.cs" />
+    <Compile Include="Robots\aDemo\DemoHammerArbitrage.cs" />
+    <Compile Include="Robots\aDemo\DemoMovingAverage.cs" />
+    <Compile Include="Robots\aDemo\DemoRobot1.cs" />
+    <Compile Include="Robots\aDemo\DemoRobot2.cs" />
+    <Compile Include="Robots\aDemo\DemoTrendEnvelopes.cs" />
+    <Compile Include="Robots\aDemo\ThreeSoldiers.cs" />
+    <Compile Include="Robots\aProd\PingBot.cs" />
+    <Compile Include="Robots\aProd\PingBotUi.xaml.cs">
+      <DependentUpon>PingBotUi.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Robots\aDev\Test1.cs" />
+    <Compile Include="Robots\aProd\MaxBot.cs" />
+    <Compile Include="Robots\aDev\Test6Candles.cs" />
+    <Compile Include="Robots\aLibs\CommonFuncs.cs" />
     <Compile Include="Robots\BotFactory.cs" />
     <Compile Include="Robots\CounterTrend\ClusterCountertrend.cs" />
     <Compile Include="Robots\High Frequency\HighFrequencyTrader.cs" />
@@ -1147,6 +1166,14 @@
     <Page Include="OsTrader\Panels\PanelsGui\BollingerOutburstUi.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Robots\aDemo\DemoBullishEngulfingUi.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Robots\aProd\PingBotUi.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Robots\CounterTrend\StrategyBollingerUi.xaml">
       <SubType>Designer</SubType>

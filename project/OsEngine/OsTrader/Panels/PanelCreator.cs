@@ -18,6 +18,10 @@ using OsEngine.OsTrader.Panels.Tab;
 using OsEngine.Robots.Trend;
 using MessageBox = System.Windows.MessageBox;
 
+using OsEngine.Robots.aDemo; //учебные роботы
+using OsEngine.Robots.aDev; //роботы в разработке
+using OsEngine.Robots.aProd; //роботы в в продакшене
+
 
 namespace OsEngine.OsTrader.Panels
 {
@@ -31,6 +35,23 @@ namespace OsEngine.OsTrader.Panels
         public static List<string> GetNamesStrategy()
         {
             List<string> result = new List<string>();
+
+            //aDev, aProd: Мои боевые роботы
+            result.Add("PingBot");
+            result.Add("MaxBot");
+            result.Add("Test1");
+            result.Add("Test6Candles");         
+
+            //аDemo: Мои учебные роботы
+            //result.Add("DemoHammer");
+            //result.Add("DemoThreeSoldiers");
+            //result.Add("DemoRobot1");
+            //result.Add("DemoRobot2");
+            //result.Add("DemoHammerArbitrage");
+            //result.Add("DemoBullishEngulfing");
+            //result.Add("DemoMovingAverage");
+            //result.Add("DemoTrendEnvelopes");
+
 
             result.Add("Engine");
             result.Add("ClusterEngine");
@@ -66,6 +87,60 @@ namespace OsEngine.OsTrader.Panels
         {
 
             BotPanel bot = null;
+
+            //aDev, aProd: Мои боевые роботы
+            if (nameClass == "PingBot")
+            {
+                bot = new PingBot(name, startProgram);
+            }
+            if (nameClass == "Test1")
+            {
+                bot = new Test1(name, startProgram);
+            }
+            if (nameClass == "Test6Candles")
+            {
+                bot = new Test6Candles(name, startProgram);
+            }
+            if (nameClass == "MaxBot")
+            {
+                bot = new MaxBot(name, startProgram);
+            }
+
+
+            //аDemo: Мои учебные роботы
+            if (nameClass == "DemoHammer")
+            {
+                bot = new DemoHammer(name, startProgram);
+            }
+            if (nameClass == "DemoThreeSoldiers")
+            {
+                bot = new DemoThreeSoldiers(name, startProgram);
+            }
+            if (nameClass == "DemoRobot1")
+            {
+                bot = new DemoRobot1(name, startProgram);
+            }
+            if (nameClass == "DemoRobot2")
+            {
+                bot = new DemoRobot2(name, startProgram);
+            }
+            if (nameClass == "DemoHammerArbitrage")
+            {
+                bot = new DemoHammerArbitrage(name, startProgram);
+            }
+            if (nameClass == "DemoBullishEngulfing")
+            {
+                bot = new DemoBullishEngulfing(name, startProgram);
+            }
+            if (nameClass == "DemoMovingAverage")
+            {
+                bot = new DemoMovingAverage(name, startProgram);
+            }
+            if (nameClass == "DemoTrendEnvelopes")
+            {
+                bot = new DemoTrendEnvelopes(name, startProgram);
+            }
+
             // примеры и бесплатные боты
 
             if (nameClass == "MomentumMACD")
