@@ -22,6 +22,9 @@ namespace OsEngine.Robots.aProd
       
     public class PingBot : BotPanel
     {
+
+        public string version = "1.0";
+        
         private BotTabSimple tab0;
 
         public bool isOn;                    //Вкл./Выкл.
@@ -153,7 +156,7 @@ namespace OsEngine.Robots.aProd
 
         public override string GetNameStrategyType()
         {
-            return "DevPingBot";
+            return "PingBot";
         }
 
         public override void ShowIndividualSettingsDialog()

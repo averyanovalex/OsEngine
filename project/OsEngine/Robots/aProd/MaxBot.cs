@@ -14,11 +14,8 @@ namespace OsEngine.Robots.aProd
 
 
     //TODO:
-    //2.Рефакторить структуру модулей
-    //3.Удалить лишний код из текущей ветки
-    //4.Придумать версионирование
-    //5.Слить ветку и обновить последние обновления
-    //6.Оптимизировать, подобрать лучшие параметры
+    //2.Слить ветку и обновить последние обновления
+    //3.Оптимизировать, подобрать лучшие параметры
 
 
     //Описание:
@@ -29,8 +26,9 @@ namespace OsEngine.Robots.aProd
     class MaxBot : BotPanel
     {
 
-        private BotTabSimple tab0;
+        public string version = "1.0";
 
+        private BotTabSimple tab0;
         
         private StrategyParameterString param_mode; // включен, выключен, шорт или лонг
         private StrategyParameterString param_working_mode;  // торговые часы
@@ -39,7 +37,7 @@ namespace OsEngine.Robots.aProd
         private StrategyParameterInt param_slack; //люфт в пунктах
         private StrategyParameterInt param_slack_order; //люфт для выставления ордера в пунктах
         private StrategyParameterInt param_candlesCount; //количество проверяемых свечей
-
+        private StrategyParameterString param_version; //версия, не меняется
         public MaxBot(string name, StartProgram startProgram) : base(name, startProgram)
         {
 
@@ -53,6 +51,7 @@ namespace OsEngine.Robots.aProd
             param_slack = CreateParameter("Slack", 3, 0, 10, 1);
             param_slack_order = CreateParameter("Slack_order", 4, 0, 10, 1);
             param_candlesCount = CreateParameter("CandlesCount", 2, 2, 5, 1);
+            param_version = CreateParameter("Version", version, new[] { version });
 
             tab0.CandleFinishedEvent += Tab0_CandleFinishedEvent;
             tab0.PositionOpeningSuccesEvent += Tab0_PositionOpeningSuccesEvent;

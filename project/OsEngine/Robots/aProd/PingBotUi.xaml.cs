@@ -17,6 +17,8 @@ namespace OsEngine.Robots.aProd
             InitializeComponent();
             _strategy = strategy;
 
+            LabeVersion.Content = "v. " + _strategy.version;
+
             CheckBoxIsOn.IsChecked = _strategy.isOn;
 
             ComboBoxWorkingMode.Items.Add(WorkingModeType.DayAndNight);
